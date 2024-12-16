@@ -4,6 +4,7 @@
 #include <cmath>
 #include <random>
 #include <algorithm>
+#include <fstream>
 
 using namespace cv;
 using namespace std;
@@ -157,13 +158,13 @@ Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha) {
 int main() {
 
     // Example input image and watermark
-    Mat original_image = imread("(C:\\Users\\lim\\OneDrive\\Pictures\\mono.png)", IMREAD_GRAYSCALE);
+    Mat original_image = imread("C:\\Users\\lim\\OneDrive\\Pictures\\persona.jpg", IMREAD_GRAYSCALE);
     if (original_image.empty()) {
         cerr << "Error: Could not load input image." << endl;
         return -1;
     }
 
-    Mat watermark = imread("C:\\Users\\lim\\OneDrive\\Pictures\\kk.jpg", IMREAD_GRAYSCALE);
+    Mat watermark = imread("C:\\Users\\lim\\OneDrive\\Pictures\\persona.jpg", IMREAD_GRAYSCALE);
     if (watermark.empty()) {
         cerr << "Error: Could not load watermark image." << endl;
         return -1;
@@ -173,7 +174,7 @@ int main() {
     resize(watermark, watermark, Size(32, 32), 0, 0, INTER_LINEAR);
     watermark.convertTo(watermark, CV_64F, 1.0 / 255.0); // Normalize to [0, 1]
 
-    // Embed watermark
+    //// Embed watermark
     Mat watermarked_image = embed_watermark(original_image, watermark, 5.11);
 
     // Save and display result
