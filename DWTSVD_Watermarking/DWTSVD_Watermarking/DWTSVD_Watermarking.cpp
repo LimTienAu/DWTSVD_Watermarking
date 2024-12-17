@@ -1,4 +1,7 @@
+#include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
+#include <opencv2/core/eigen.hpp>
+
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -22,7 +25,7 @@ struct Block {
 // Function to apply Gaussian blur
 Mat apply_blur(const Mat& img, double sigma) {
     Mat blurred;
-    GaussianBlur(img, blurred, Size(0, 0), sigma);
+    cv::GaussianBlur(img, blurred, Size(0, 0), sigma);
     return blurred;
 }
 
@@ -77,10 +80,10 @@ void haar_wavelet_transform(const Mat& src, Mat& LL, Mat& LH, Mat& HL, Mat& HH) 
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
-            double a = src.at<uchar>(i * 2, j * 2);
-            double b = src.at<uchar>(i * 2, j * 2 + 1);
-            double c = src.at<uchar>(i * 2 + 1, j * 2);
-            double d = src.at<uchar>(i * 2 + 1, j * 2 + 1);
+            double a = src.at<double>(i * 2, j * 2);
+            double b = src.at<double>(i * 2, j * 2 + 1);
+            double c = src.at<double>(i * 2 + 1, j * 2);
+            double d = src.at<double>(i * 2 + 1, j * 2 + 1);
 
             LL.at<double>(i, j) = (a + b + c + d) / 4.0;
             LH.at<double>(i, j) = (a - b + c - d) / 4.0;
@@ -115,17 +118,162 @@ void inverse_haar_wavelet_transform(const Mat& LL, const Mat& LH, const Mat& HL,
 }
 
 // Function to compute SVD
+/*
 void compute_svd(const Mat& src, Mat& U, Mat& S, Mat& Vt) {
     Mat src_double;
     src.convertTo(src_double, CV_64F);
     SVD svd(src_double, SVD::FULL_UV);
-    U = svd.u;
-    S = svd.w;
-    Vt = svd.vt;
+    U = svd.u.clone();
+    S = svd.w.clone();
+    Vt = svd.vt.clone();
+}*/
+
+void compute_svd(const Mat& src, Mat& U, Mat& S, Mat& Vt) {
+    // Convert OpenCV matrix to Eigen matrix
+    Eigen::MatrixXd src_eigen; 
+    cv::cv2eigen(src, src_eigen);
+
+    // Perform SVD using Eigen
+    Eigen::JacobiSVD<Eigen::MatrixXd> svd(src_eigen, Eigen::ComputeFullU | Eigen::ComputeFullV);
+    // Assign results to OpenCV matrices
+    cv::eigen2cv(svd.matrixU(), U);
+    cv::eigen2cv(svd.singularValues(), S);
+    cv::eigen2cv(svd.matrixV(), Vt);
+}
+
+void reconstruct_matrix(const Mat& U, const Mat& S, const Mat& Vt, Mat& reconstructed) {
+    // Convert OpenCV matrices to Eigen matrices
+    Eigen::MatrixXd U_eigen, S_eigen, Vt_eigen;
+    cv::cv2eigen(U, U_eigen);
+    cv::cv2eigen(S, S_eigen);
+    cv::cv2eigen(Vt, Vt_eigen);
+
+    // Create a diagonal matrix from the singular values
+    Eigen::MatrixXd S_diag = S_eigen.asDiagonal();
+
+    // Reconstruct the matrix using Eigen's matrix multiplication
+    Eigen::MatrixXd reconstructed_eigen = U_eigen * S_diag * Vt_eigen.transpose();
+    // Convert the reconstructed Eigen matrix back to an OpenCV matrix
+    cv::eigen2cv(reconstructed_eigen, reconstructed);
+
+}
+
+// Function to save the singular value matrix (S) as a secret key
+void save_singular_values(const Mat& S, const string& key_file) {
+    ofstream file(key_file, ios::binary);
+    if (file.is_open()) {
+        int rows = S.rows;
+        int cols = S.cols;
+        file.write((char*)&rows, sizeof(int));
+        file.write((char*)&cols, sizeof(int));
+        file.write((char*)S.data, rows * cols * sizeof(double));
+        file.close();
+        cout << "Secret key (singular values) saved to " << key_file << endl;
+    }
+    else {
+        cerr << "Error: Could not save singular values to file." << endl;
+    }
+}
+
+// Function to load the singular value matrix (S) from the secret key file
+Mat load_singular_values(const string& key_file) {
+    ifstream file(key_file, ios::binary);
+    if (!file.is_open()) {
+        cerr << "Error: Could not load singular values from file." << endl;
+        return Mat();
+    }
+
+    int rows, cols;
+    file.read((char*)&rows, sizeof(int));
+    file.read((char*)&cols, sizeof(int));
+    Mat S(rows, cols, CV_64F);
+    file.read((char*)S.data, rows * cols * sizeof(double));
+    file.close();
+    return S;
+}
+
+void save_selected_blocks(const vector<Block>& selected_blocks, const string& key_file) {
+    std::ofstream file(key_file, std::ios::binary);
+
+    if (file.is_open()) {
+        // Write the number of selected blocks
+        int num_blocks = selected_blocks.size();
+        file.write((char*)&num_blocks, sizeof(int));
+
+        // Write each block information
+        for (const Block& block : selected_blocks) {
+            // Write block location (x, y, width, height)
+            file.write((char*)&block.location.x, sizeof(int));
+            file.write((char*)&block.location.y, sizeof(int));
+            file.write((char*)&block.location.width, sizeof(int));
+            file.write((char*)&block.location.height, sizeof(int));
+
+            // Write block's spatial and attack values
+            file.write((char*)&block.spatial_value, sizeof(double));
+            file.write((char*)&block.attack_value, sizeof(double));
+        }
+
+        file.close();
+        std::cout << "Selected blocks information saved to " << key_file << std::endl;
+    }
+    else {
+        std::cerr << "Error: Could not save selected blocks to file." << std::endl;
+    }
+}
+
+vector<Block> load_selected_blocks(const string& key_file) {
+    vector<Block> selected_blocks;
+    std::ifstream file(key_file, std::ios::binary);
+
+    if (!file.is_open()) {
+        // Handle error: couldn't open file
+        throw std::runtime_error("Could not open key file");
+    }
+
+    // Read the number of selected blocks
+    int num_blocks;
+    file.read((char*)&num_blocks, sizeof(int));
+
+    selected_blocks.resize(num_blocks);
+
+    // Read each block information
+    for (int i = 0; i < num_blocks; ++i) {
+        Block block;
+        file.read((char*)&block.location.x, sizeof(int));
+        file.read((char*)&block.location.y, sizeof(int));
+        file.read((char*)&block.location.width, sizeof(int));
+        file.read((char*)&block.location.height, sizeof(int));
+        file.read((char*)&block.spatial_value, sizeof(double));
+        file.read((char*)&block.attack_value, sizeof(double));
+        selected_blocks[i] = block;
+    }
+
+    file.close();
+    return selected_blocks;
+}
+
+void save_svd_components(const Mat& U, const Mat& S, const Mat& Vt, const string& filename) {
+    FileStorage fs(filename, FileStorage::WRITE);
+
+    fs << "U" << U;
+    fs << "S" << S;
+    fs << "Vt" << Vt;
+
+    fs.release();
+}
+
+void load_svd_components(const string& filename, Mat& U, Mat& S, Mat& Vt) {
+    FileStorage fs(filename, FileStorage::READ);
+
+    fs["U"] >> U;
+    fs["S"] >> S;
+    fs["Vt"] >> Vt;
+
+    fs.release();
 }
 
 // Function to embed watermark
-Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, int n_blocks_to_embed = 32, int block_size = 4, double spatial_weight = 0.33) {
+Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, const string& key_filename, int n_blocks_to_embed = 32, int block_size = 4, double spatial_weight = 0.33) {
     // Initialize variables
     Mat watermarked_image = original.clone();
     watermarked_image.convertTo(watermarked_image, CV_64F);
@@ -260,6 +408,20 @@ Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, int
 
     Mat Uwm, Swm, Vtwm;
     compute_svd(watermark_resized, Uwm, Swm, Vtwm);
+////////////////////////
+imshow("Watered resize Image", watermark_resized);
+    waitKey(0);
+    Mat newwm = Mat::zeros(Size(32, 32), CV_64F);
+
+    reconstruct_matrix(Uwm, Swm, Vtwm, newwm);
+
+    imshow("Test SVD resize Image", newwm);
+    waitKey(0);
+/////////////////////////////
+    save_svd_components(Uwm, Swm, Vtwm, key_filename + "wm_svd");
+
+    save_singular_values(Swm, key_filename + "_singular");
+    save_selected_blocks(selected_blocks, key_filename + "_block");
 
     // Embed watermark into selected blocks
     for (int idx = 0; idx < selected_blocks.size(); ++idx) {
@@ -276,8 +438,8 @@ Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, int
 
         // Modify singular values
         // Ensure we don't exceed the size of Swm
-        int swm_size = Swm.rows;
-        for (int i = 0; i < min((int)Sc.rows, (int)swm_size); ++i) {
+        int min_size = std::min(Sc.rows, Swm.cols); 
+        for (int i = 0; i < min_size; ++i) {
             Sc.at<double>(i) += alpha * Swm.at<double>(idx % Swm.rows, i);
         }
 
@@ -302,9 +464,54 @@ Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, int
     return watermarked_image;
 }
 
+
+Mat extract_watermark(const Mat& watermarked_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11) {
+    // Load singular values and selected blocks
+    Mat Uwm, Swmtemp, Vtwm;
+    Mat Swm = load_singular_values(key_filename + "_singular");
+    vector<Block> selected_blocks = load_selected_blocks(key_filename + "_block");
+    load_svd_components(key_filename +"wm_svd", Uwm, Swmtemp, Vtwm);
+
+    // Initialize watermark image
+    Mat extracted_watermark = Mat::zeros(Size(32, 32), CV_64F);
+
+    // Iterate over the selected blocks to extract watermark components
+    for (int idx = 0; idx < min(n_blocks_to_extract, (int)selected_blocks.size()); ++idx) {
+        Rect block_loc = selected_blocks[idx].location;
+        Mat block = watermarked_image(block_loc).clone();
+
+        block.convertTo(block, CV_64F);
+        // Perform DWT on the block
+        Mat LL, LH, HL, HH;
+        haar_wavelet_transform(block, LL, LH, HL, HH);
+
+        // Perform SVD on LL subband
+        Mat Uc, Sc, Vtc;
+        compute_svd(LL, Uc, Sc, Vtc);
+
+        // Extract singular values related to the watermark
+        int min_size = std::min(Sc.rows, Swm.cols);
+        for (int i = 0; i < min_size; ++i) {
+            double extracted_value = (Sc.at<double>(i) - Swm.at<double>(idx % Swm.rows, i)) / alpha;
+            extracted_watermark.at<double>(idx / 32, idx % 32) += extracted_value; // Map values to watermark matrix
+        }
+        
+    }
+
+    extracted_watermark = Uwm * extracted_watermark * Vtwm.t();
+    // Normalize and convert to CV_8U
+    normalize(extracted_watermark, extracted_watermark, 0, 255, NORM_MINMAX);
+    extracted_watermark.convertTo(extracted_watermark, CV_8U);
+
+    return extracted_watermark;
+}
+
 #include <filesystem>
 int main() {
-    std::string original_image_path = "mono.png";
+
+    string original_image_path = "mono.png";
+    string output_image_path = "watermarked_image.png";
+
     if (!std::filesystem::exists(original_image_path)) {
         std::cerr << "File does not exist: " << original_image_path << std::endl;
         return -1;
@@ -368,7 +575,7 @@ int main() {
     // ============================ //
 
     double alpha = 5.11; // Embedding strength
-    Mat watermarked_image = embed_watermark(original_image, watermark_image, alpha);
+    Mat watermarked_image = embed_watermark(original_image, watermark_image, alpha, output_image_path);
 
     // ============================ //
     //      Display Results         //
@@ -381,13 +588,73 @@ int main() {
     waitKey(0);
 
     // Save watermarked image
-    string output_image_path = "watermarked_image.png";
     bool isSaved = imwrite(output_image_path, watermarked_image);
     if (isSaved) {
         cout << "Watermarked image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save watermarked image." << endl;
+    }
+
+    //Extraction
+    if (!std::filesystem::exists(output_image_path)) {
+        std::cerr << "File does not exist: " << output_image_path << std::endl;
+        return -1;
+    }
+
+    watermarked_image = imread(output_image_path, IMREAD_GRAYSCALE);
+    if (watermarked_image.empty()) {
+        cerr << "Error: Could not load original image from path: " << output_image_path << endl;
+        return -1;
+    }
+
+    Mat extracted_watermark = extract_watermark(watermarked_image, output_image_path);
+    // Display the extracted watermark
+    namedWindow("Extracted Watermark", WINDOW_NORMAL);
+    imshow("Extracted Watermark", extracted_watermark);
+    waitKey(0);
+
+    // Save the extracted watermark
+    string extracted_watermark_path = "extracted_watermark.png";
+    bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
+    if (isWatermarkSaved) {
+        cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
+    }
+    else {
+        cerr << "Error: Could not save the extracted watermark." << endl;
+    }
+    return 0;
+}
+
+
+int mainex() {
+    std::string original_image_path = "watermarked_image.png";
+    if (!std::filesystem::exists(original_image_path)) {
+        std::cerr << "File does not exist: " << original_image_path << std::endl;
+        return -1;
+    }
+    
+    Mat watermarked_image = imread(original_image_path, IMREAD_GRAYSCALE);
+    if (watermarked_image.empty()) {
+        cerr << "Error: Could not load original image from path: " << original_image_path << endl;
+        return -1;
+    }
+
+    Mat extracted_watermark = extract_watermark(watermarked_image, original_image_path);
+
+    // Display the extracted watermark
+    namedWindow("Extracted Watermark", WINDOW_NORMAL);
+    imshow("Extracted Watermark", extracted_watermark);
+    waitKey(0);
+
+    // Save the extracted watermark
+    string extracted_watermark_path = "extracted_watermark.png";
+    bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
+    if (isWatermarkSaved) {
+        cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
+    }
+    else {
+        cerr << "Error: Could not save the extracted watermark." << endl;
     }
 
     return 0;
