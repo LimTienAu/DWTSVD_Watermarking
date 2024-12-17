@@ -1,9 +1,13 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\lim\\OneDrive\\Documents\\GitHub\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\",
+  "WorkspaceRootPath": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\lim\\OneDrive\\Documents\\GitHub\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Dependencies\\opencv\\build\\include\\opencv2\\core\\mat.inl.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|solutionrelative:DWTSVD_Watermarking\\Dependencies\\opencv\\build\\include\\opencv2\\core\\mat.inl.hpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -14,25 +18,30 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 2,
+          "SelectedChildIndex": 0,
           "Children": [
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{eefa5220-e298-11d0-8f78-00a0c9110057}"
-            },
-            {
-              "$type": "Bookmark",
-              "Name": "ST:0:0:{1c4feeaa-4718-4aa9-859d-94ce25d182ba}"
-            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
+              "Title": "mat.inl.hpp",
+              "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Dependencies\\opencv\\build\\include\\opencv2\\core\\mat.inl.hpp",
+              "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Dependencies\\opencv\\build\\include\\opencv2\\core\\mat.inl.hpp",
+              "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Dependencies\\opencv\\build\\include\\opencv2\\core\\mat.inl.hpp",
+              "RelativeToolTip": "DWTSVD_Watermarking\\Dependencies\\opencv\\build\\include\\opencv2\\core\\mat.inl.hpp",
+              "ViewState": "AgIAAIEDAAAAAAAAAAArwJADAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
+              "WhenOpened": "2024-12-17T10:17:39.072Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
               "Title": "DWTSVD_Watermarking.cpp",
-              "DocumentMoniker": "C:\\Users\\lim\\OneDrive\\Documents\\GitHub\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp",
+              "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp",
-              "ToolTip": "C:\\Users\\lim\\OneDrive\\Documents\\GitHub\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp",
+              "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp",
               "RelativeToolTip": "DWTSVD_Watermarking\\DWTSVD_Watermarking.cpp",
-              "ViewState": "AQIAACsBAAAAAAAAAAAAADUBAAASAAAA",
+              "ViewState": "AgIAAH4AAAAAAAAAAAAAAEgAAAARAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-12-16T05:08:15.391Z",
               "EditorCaption": ""

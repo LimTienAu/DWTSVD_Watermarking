@@ -109,15 +109,16 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>$(ProjectDir)Dependencies\opencv\build\include</AdditionalIncludeDirectories>
+      <AdditionalUsingDirectories>$(ProjectDir)Dependencies\opencv\build\include;%(AdditionalUsingDirectories)</AdditionalUsingDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>$(SolutionDir)opencv\build\x64\vc16\lib\opencv_world4100.lib;$(SolutionDir)opencv\build\x64\vc16\lib\opencv_world4100d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(ProjectDir)Dependencies\opencv\build\x64\vc16\lib\opencv_world4100d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>xcopy /Y /D "$(SolutionDir)opencv\build\x64\vc16\bin\*.dll" "$(OutDir)"
-</Command>
+      <Command>  xcopy $(ProjectDir)Dependencies\opencv\build\x64\vc16\bin\opencv_world4100d.dll $(SolutionDir)$(Platform)\$(Configuration)\ /c /y</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
