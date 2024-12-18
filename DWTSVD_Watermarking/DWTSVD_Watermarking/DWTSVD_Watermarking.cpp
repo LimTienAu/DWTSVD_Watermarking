@@ -114,19 +114,22 @@ void inverse_haar_wavelet_transform(const Mat& LL, const Mat& LH, const Mat& HL,
         }
     }
     // Normalize the values to [0,255]
-    normalize(dst, dst, 0, 255, NORM_MINMAX);
+    //normalize(dst, dst, 0, 255, NORM_MINMAX);
 }
 
-// Function to compute SVD
-/*
-void compute_svd(const Mat& src, Mat& U, Mat& S, Mat& Vt) {
-    Mat src_double;
-    src.convertTo(src_double, CV_64F);
-    SVD svd(src_double, SVD::FULL_UV);
-    U = svd.u.clone();
-    S = svd.w.clone();
-    Vt = svd.vt.clone();
-}*/
+bool is_image_size_sufficient(int original_width, int original_height, int watermark_width, int watermark_height, int block_size, int n_blocks_to_embed) {
+    // Calculate the total required blocks for the watermark
+    int total_required_blocks = ceil((double)(watermark_width * watermark_height) / (block_size * block_size));
+
+    // Calculate the total available blocks in the original image
+    int total_image_blocks = (original_width / block_size) * (original_height / block_size);
+
+    // Use the minimum of available blocks and n_blocks_to_embed
+    int available_blocks = min(total_image_blocks, n_blocks_to_embed);
+
+    // Check if available blocks are sufficient
+    return available_blocks >= total_required_blocks;
+}
 
 void compute_svd(const Mat& src, Mat& U, Mat& S, Mat& Vt) {
     // Convert OpenCV matrix to Eigen matrix
@@ -149,7 +152,9 @@ void reconstruct_matrix(const Mat& U, const Mat& S, const Mat& Vt, Mat& reconstr
     cv::cv2eigen(Vt, Vt_eigen);
 
     // Create a diagonal matrix from the singular values
-    Eigen::MatrixXd S_diag = S_eigen.asDiagonal();
+    Eigen::MatrixXd S_diag = S_eigen;
+    if (S.rows == 1 || S.cols == 1)
+        S_diag = S_eigen.asDiagonal();
 
     // Reconstruct the matrix using Eigen's matrix multiplication
     Eigen::MatrixXd reconstructed_eigen = U_eigen * S_diag * Vt_eigen.transpose();
@@ -272,8 +277,39 @@ void load_svd_components(const string& filename, Mat& U, Mat& S, Mat& Vt) {
     fs.release();
 }
 
+void saveMatVectorToFile(const std::vector<Mat>& mat_vector, const std::string& filename) {
+    FileStorage fs(filename, FileStorage::WRITE);
+
+    fs << "MatVector" << "[";
+    for (const auto& mat : mat_vector) {
+        fs << mat;
+    }
+    fs << "]";
+
+    fs.release();
+}
+
+std::vector<Mat> loadMatVectorFromFile(const std::string& filename) {
+    FileStorage fs(filename, FileStorage::READ);
+
+    std::vector<Mat> mat_vector;
+    FileNode node = fs["MatVector"];
+    for (FileNodeIterator it = node.begin(); it != node.end(); ++it) {
+        Mat mat;
+        *it >> mat;
+        mat_vector.push_back(mat);
+    }
+
+    fs.release();
+    return mat_vector;
+}
+
 // Function to embed watermark
-Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, const string& key_filename, int n_blocks_to_embed = 32, int block_size = 4, double spatial_weight = 0.33) {
+Mat embed_watermark(
+    const Mat& original, const Mat& watermark, double alpha, 
+    const string& key_filename, int wm_width = 32, int wm_height = 32,
+    int n_blocks_to_embed = 32, int block_size = 4, double spatial_weight = 0.33
+) {
     // Initialize variables
     Mat watermarked_image = original.clone();
     watermarked_image.convertTo(watermarked_image, CV_64F);
@@ -402,32 +438,31 @@ Mat embed_watermark(const Mat& original, const Mat& watermark, double alpha, con
     }
 
     // Precompute SVD of the watermark
+    wm_width = min(watermark.cols, wm_width); // Set max watermark size dynamically
+    wm_height = min(watermark.rows, wm_height);
     Mat watermark_resized;
-    resize(watermark, watermark_resized, Size(32, 32), 0, 0, INTER_LINEAR);
+    resize(watermark, watermark_resized, Size(wm_width, wm_height), 0, 0, INTER_LINEAR);
     watermark_resized.convertTo(watermark_resized, CV_64F, 1.0 / 255.0); // Normalize
+
+
+    //Save resized watermark image
+    Mat save_watermark = watermark_resized.clone();
+    normalize(save_watermark, save_watermark, 0, 255, NORM_MINMAX);
+    save_watermark.convertTo(save_watermark, CV_8U);
+    imwrite(key_filename + "_actualwatermark.tiff", save_watermark);
+    namedWindow("Resized watermark", WINDOW_NORMAL);
+    imshow("Resized watermark", save_watermark); waitKey(0);
 
     Mat Uwm, Swm, Vtwm;
     compute_svd(watermark_resized, Uwm, Swm, Vtwm);
-////////////////////////
-imshow("Watered resize Image", watermark_resized);
-    waitKey(0);
-    Mat newwm = Mat::zeros(Size(32, 32), CV_64F);
-
-    reconstruct_matrix(Uwm, Swm, Vtwm, newwm);
-
-    imshow("Test SVD resize Image", newwm);
-    waitKey(0);
-/////////////////////////////
-    save_svd_components(Uwm, Swm, Vtwm, key_filename + "wm_svd");
-
-    save_singular_values(Swm, key_filename + "_singular");
+    save_svd_components(Uwm.clone(), Swm.clone(), Vtwm.clone(), key_filename + "wm_svd");
     save_selected_blocks(selected_blocks, key_filename + "_block");
 
+    vector<Mat> original_Sc;
     // Embed watermark into selected blocks
     for (int idx = 0; idx < selected_blocks.size(); ++idx) {
         Rect block_loc = selected_blocks[idx].location;
         Mat block = watermarked_image(block_loc).clone();
-
         // Perform DWT on the block
         Mat LL, LH, HL, HH;
         haar_wavelet_transform(block, LL, LH, HL, HH);
@@ -435,31 +470,36 @@ imshow("Watered resize Image", watermark_resized);
         // Perform SVD on LL subband
         Mat Uc, Sc, Vtc;
         compute_svd(LL, Uc, Sc, Vtc);
+        
+        original_Sc.push_back(Sc.clone());
 
-        // Modify singular values
-        // Ensure we don't exceed the size of Swm
-        int min_size = std::min(Sc.rows, Swm.cols); 
-        for (int i = 0; i < min_size; ++i) {
-            Sc.at<double>(i) += alpha * Swm.at<double>(idx % Swm.rows, i);
+        // Embed watermark subset
+        int shape_LL_tmp = Sc.rows; // Assuming rows represent shape_LL_tmp
+        int start_idx = (idx * shape_LL_tmp) % Swm.rows; // Modulo ensures cyclic access to Swm
+        int end_idx = start_idx + shape_LL_tmp;
+
+        // Create a subset of Swm with wrapping
+        vector<double> Swm_subset(shape_LL_tmp);
+        for (int i = 0; i < shape_LL_tmp; ++i) {
+            Swm_subset[i] = Swm.at<double>((start_idx + i) % Swm.rows, 0); // Access column-wise
         }
 
-        // Reconstruct LL subband
-        Mat modified_S = Mat::diag(Sc);
-        Mat modified_LL = Uc * modified_S * Vtc;
+        // Embed the watermark into Sc
+        int min_size = std::min(Sc.rows, (int)Swm_subset.size());
+        for (int i = 0; i < min_size; ++i) {
+            Sc.at<double>(i) += alpha * Swm_subset[i];
+        }
 
         // Perform inverse DWT
-        Mat reconstructed_block;
+        Mat reconstructed_block, modified_LL;
+        reconstruct_matrix(Uc, Sc, Vtc, modified_LL);
+        
         inverse_haar_wavelet_transform(modified_LL, LH, HL, HH, reconstructed_block);
-
         // Replace the block in the watermarked image
-        watermarked_image(block_loc) = reconstructed_block;
+        reconstructed_block.copyTo(watermarked_image(block_loc));
     }
 
-    // Finalize watermarked image
-    watermarked_image = watermarked_image + blank_image;
-    watermarked_image = min(watermarked_image, 255.0);
-    watermarked_image = max(watermarked_image, 0.0);
-    watermarked_image.convertTo(watermarked_image, CV_8U);
+    saveMatVectorToFile(original_Sc, key_filename + "ori_s");
 
     return watermarked_image;
 }
@@ -467,38 +507,42 @@ imshow("Watered resize Image", watermark_resized);
 
 Mat extract_watermark(const Mat& watermarked_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11) {
     // Load singular values and selected blocks
-    Mat Uwm, Swmtemp, Vtwm;
-    Mat Swm = load_singular_values(key_filename + "_singular");
+    Mat Uwm, Swm, Vtwm;
     vector<Block> selected_blocks = load_selected_blocks(key_filename + "_block");
-    load_svd_components(key_filename +"wm_svd", Uwm, Swmtemp, Vtwm);
+    load_svd_components(key_filename +"wm_svd", Uwm, Swm, Vtwm);
+    vector<Mat> ori_S  = loadMatVectorFromFile( key_filename + "ori_s"); 
 
     // Initialize watermark image
-    Mat extracted_watermark = Mat::zeros(Size(32, 32), CV_64F);
-
+    Mat extracted_watermark_S = Mat::zeros(Swm.size(), CV_64F);
     // Iterate over the selected blocks to extract watermark components
     for (int idx = 0; idx < min(n_blocks_to_extract, (int)selected_blocks.size()); ++idx) {
         Rect block_loc = selected_blocks[idx].location;
         Mat block = watermarked_image(block_loc).clone();
-
         block.convertTo(block, CV_64F);
+        
         // Perform DWT on the block
         Mat LL, LH, HL, HH;
         haar_wavelet_transform(block, LL, LH, HL, HH);
-
         // Perform SVD on LL subband
         Mat Uc, Sc, Vtc;
         compute_svd(LL, Uc, Sc, Vtc);
-
-        // Extract singular values related to the watermark
-        int min_size = std::min(Sc.rows, Swm.cols);
-        for (int i = 0; i < min_size; ++i) {
-            double extracted_value = (Sc.at<double>(i) - Swm.at<double>(idx % Swm.rows, i)) / alpha;
-            extracted_watermark.at<double>(idx / 32, idx % 32) += extracted_value; // Map values to watermark matrix
-        }
         
-    }
+         // Extract singular values related to the watermark
+        int min_size = std::min(Sc.rows, Swm.rows);
+        Mat current_oriSc = ori_S[idx];
 
-    extracted_watermark = Uwm * extracted_watermark * Vtwm.t();
+        for (int i = 0; i < min_size; ++i) {
+            // Compute the original index in Swm
+            int wm_index = (idx * Sc.rows + i) % Swm.rows;
+
+            // Calculate extracted watermark singular value
+            double extracted_value = (Sc.at<double>(i) - current_oriSc.at<double>(i)) / alpha;
+            // Add the extracted value to the corresponding position in extracted_watermark_S
+            extracted_watermark_S.at<double>(wm_index) += extracted_value;
+        }
+    }
+    Mat extracted_watermark;
+    reconstruct_matrix(Uwm, extracted_watermark_S, Vtwm, extracted_watermark);
     // Normalize and convert to CV_8U
     normalize(extracted_watermark, extracted_watermark, 0, 255, NORM_MINMAX);
     extracted_watermark.convertTo(extracted_watermark, CV_8U);
@@ -506,33 +550,25 @@ Mat extract_watermark(const Mat& watermarked_image, const string& key_filename, 
     return extracted_watermark;
 }
 
+
 #include <filesystem>
 int main() {
+    int original_width = 512;
+    int original_height = 512;
+    int watermark_width = 64;
+    int watermark_height = 64;
+    int block_size = 4;
+    int n_blocks_to_embed = 128;
+    double spatial_weight = 0.33;
 
-    string original_image_path = "mono.png";
-    string output_image_path = "watermarked_image.png";
+    string original_image_path = "home.jpg";
+    string output_image_path = "watermarked_image.tiff";
+    string watermark_image_path = "mono.png";
 
     if (!std::filesystem::exists(original_image_path)) {
         std::cerr << "File does not exist: " << original_image_path << std::endl;
         return -1;
     }
-    // ============================ //
-    //      Fixed Image Paths       //
-    // ============================ //
-
-    // Define the paths to the original and watermark images
-    // You can use absolute paths or relative paths based on your project structure
-    // Example using absolute paths:
-    // string original_image_path = "C:\\Users\\YourUsername\\Pictures\\original.jpg";
-    // string watermark_image_path = "C:\\Users\\YourUsername\\Pictures\\watermark.png";
-
-    // Example using relative paths (assuming images are in the project directory)
-    
-    string watermark_image_path = "kk.jpg";
-
-    // ============================ //
-    //      Load Original Image     //
-    // ============================ //
 
     // Load original image in grayscale
     Mat original_image = imread(original_image_path, IMREAD_GRAYSCALE);
@@ -542,9 +578,9 @@ int main() {
     }
 
     // Resize original image to 512x512 if not already
-    if (original_image.rows != 512 || original_image.cols != 512) {
-        resize(original_image, original_image, Size(512, 512), 0, 0, INTER_LINEAR);
-        cout << "Original image resized to 512x512." << endl;
+    if (original_image.rows > original_height || original_image.cols > original_width) {
+        resize(original_image, original_image, Size(original_height, original_width), 0, 0, INTER_LINEAR);
+        cout << "Original image resized to "<<original_width<<"x"<<original_height << endl;
     }
 
     // Display original image
@@ -552,10 +588,6 @@ int main() {
     imshow("Original Image", original_image);
     // Wait for a key press to proceed
     waitKey(0);
-
-    // ============================ //
-    //      Load Watermark Image    //
-    // ============================ //
 
     // Load watermark image in grayscale
     Mat watermark_image = imread(watermark_image_path, IMREAD_GRAYSCALE);
@@ -570,23 +602,17 @@ int main() {
     // Wait for a key press to proceed
     waitKey(0);
 
-    // ============================ //
-    //      Embed Watermark         //
-    // ============================ //
-
     double alpha = 5.11; // Embedding strength
-    Mat watermarked_image = embed_watermark(original_image, watermark_image, alpha, output_image_path);
 
-    // ============================ //
-    //      Display Results         //
-    // ============================ //
+    Mat watermarked_image = embed_watermark(
+        original_image, watermark_image, alpha, output_image_path,
+        watermark_width, watermark_height,
+        n_blocks_to_embed, block_size, spatial_weight
+    );
 
     // Display watermarked image
     namedWindow("Watermarked Image", WINDOW_NORMAL);
-    imshow("Watermarked Image", watermarked_image);
-    // Wait for a key press to proceed
-    waitKey(0);
-
+    
     // Save watermarked image
     bool isSaved = imwrite(output_image_path, watermarked_image);
     if (isSaved) {
@@ -595,6 +621,12 @@ int main() {
     else {
         cerr << "Error: Could not save watermarked image." << endl;
     }
+    
+    normalize(watermarked_image, watermarked_image, 0, 255, NORM_MINMAX);
+    // Convert to 8-bit unsigned integer for display
+    watermarked_image.convertTo(watermarked_image, CV_8U);
+    imshow("Watermarked Image", watermarked_image);
+    waitKey(0);
 
     //Extraction
     if (!std::filesystem::exists(output_image_path)) {
@@ -602,13 +634,13 @@ int main() {
         return -1;
     }
 
-    watermarked_image = imread(output_image_path, IMREAD_GRAYSCALE);
-    if (watermarked_image.empty()) {
+    Mat ext_watermarked_image = imread(output_image_path, IMREAD_UNCHANGED);
+    if (ext_watermarked_image.empty()) {
         cerr << "Error: Could not load original image from path: " << output_image_path << endl;
         return -1;
     }
 
-    Mat extracted_watermark = extract_watermark(watermarked_image, output_image_path);
+    Mat extracted_watermark = extract_watermark(ext_watermarked_image, output_image_path, 32, 4, alpha);
     // Display the extracted watermark
     namedWindow("Extracted Watermark", WINDOW_NORMAL);
     imshow("Extracted Watermark", extracted_watermark);
@@ -623,39 +655,5 @@ int main() {
     else {
         cerr << "Error: Could not save the extracted watermark." << endl;
     }
-    return 0;
-}
-
-
-int mainex() {
-    std::string original_image_path = "watermarked_image.png";
-    if (!std::filesystem::exists(original_image_path)) {
-        std::cerr << "File does not exist: " << original_image_path << std::endl;
-        return -1;
-    }
-    
-    Mat watermarked_image = imread(original_image_path, IMREAD_GRAYSCALE);
-    if (watermarked_image.empty()) {
-        cerr << "Error: Could not load original image from path: " << original_image_path << endl;
-        return -1;
-    }
-
-    Mat extracted_watermark = extract_watermark(watermarked_image, original_image_path);
-
-    // Display the extracted watermark
-    namedWindow("Extracted Watermark", WINDOW_NORMAL);
-    imshow("Extracted Watermark", extracted_watermark);
-    waitKey(0);
-
-    // Save the extracted watermark
-    string extracted_watermark_path = "extracted_watermark.png";
-    bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
-    if (isWatermarkSaved) {
-        cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
-    }
-    else {
-        cerr << "Error: Could not save the extracted watermark." << endl;
-    }
-
     return 0;
 }
