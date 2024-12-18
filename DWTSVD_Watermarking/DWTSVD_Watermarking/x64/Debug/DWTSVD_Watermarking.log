@@ -1,5 +1,5 @@
 ﻿  DWTSVD_Watermarking.cpp
-C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking.cpp(205,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking.cpp(255,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   DWTSVD_Watermarking.vcxproj -> C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\x64\Debug\DWTSVD_Watermarking.exe
   C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Dependencies\opencv\build\x64\vc16\bin\opencv_world4100d.dll
   1 File(s) copied

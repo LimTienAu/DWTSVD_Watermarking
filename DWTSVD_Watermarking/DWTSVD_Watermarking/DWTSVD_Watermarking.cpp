@@ -163,6 +163,56 @@ void reconstruct_matrix(const Mat& U, const Mat& S, const Mat& Vt, Mat& reconstr
 
 }
 
+cv::Mat customConvert8U(const cv::Mat& src) {
+    Mat dst;
+
+    // Step 1: Find the min and max values in the source matrix
+    double minVal, maxVal;
+    minMaxLoc(src, &minVal, &maxVal);
+
+    // Step 2: Check if the values are within [0, 255]
+    if (minVal < 0 || maxVal > 255) {
+        // Step 3: Scale the values to fit within [0, 255]
+        Mat normalized;
+        src.convertTo(normalized, CV_64F, 255.0 / (maxVal - minVal), -minVal * 255.0 / (maxVal - minVal));
+
+        // Convert to CV_8U
+        normalized.convertTo(dst, CV_8U);
+    }
+    else {
+        // Direct conversion if values are already within range
+        src.convertTo(dst, CV_8U);
+    }
+
+    return dst;
+}
+
+cv::Mat extractPrecisionDifference(const Mat& mat8u, const Mat& mat64f) {
+    cv::Mat dst(mat64f.rows, mat64f.cols, mat64f.type());
+
+    for (int i = 0; i < mat64f.rows; ++i) {
+        for (int j = 0; j < mat64f.cols; ++j) {
+            double value = mat64f.at<double>(i, j);
+            int integerPart = mat8u.at<uchar>(i, j);
+            double fractionalPart = value - integerPart;
+            dst.at<double>(i, j) = fractionalPart;
+        }
+    }
+
+    return dst;
+}
+
+cv::Mat combineMatPrecision(const cv::Mat& integerMat, const cv::Mat& precisionMat) {
+    cv::Mat dst(precisionMat.rows, precisionMat.cols, CV_64F);
+    for (int i = 0; i < precisionMat.rows; ++i) {
+        for (int j = 0; j < precisionMat.cols; ++j) {
+            dst.at<double>(i, j) = precisionMat.at<double>(i, j) + (integerMat.at<uchar>(i, j));
+        }
+    }
+
+    return dst;
+}
+
 // Function to save the singular value matrix (S) as a secret key
 void save_singular_values(const Mat& S, const string& key_file) {
     ofstream file(key_file, ios::binary);
@@ -302,6 +352,50 @@ std::vector<Mat> loadMatVectorFromFile(const std::string& filename) {
 
     fs.release();
     return mat_vector;
+}
+
+void savePrecisionMat(const cv::Mat& precisionMat, const std::string& filename) {
+    std::ofstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+
+    // Write matrix dimensions
+    file << precisionMat.rows << " " << precisionMat.cols << std::endl;
+
+    // Write matrix elements with fixed precision
+    for (int i = 0; i < precisionMat.rows; ++i) {
+        for (int j = 0; j < precisionMat.cols; ++j) {
+            file << std::fixed << std::setprecision(6) << precisionMat.at<double>(i, j) << " ";
+        }
+        file << std::endl;
+    }
+
+    file.close();
+}
+
+cv::Mat loadPrecisionMat(const std::string& filename) {
+    std::ifstream file(filename);
+    if (!file.is_open()) {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return cv::Mat();
+    }
+
+    int rows, cols;
+    file >> rows >> cols;
+
+    cv::Mat precisionMat(rows, cols, CV_64F);
+
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            file >> precisionMat.at<double>(i, j);
+        }
+    }
+
+    file.close();
+
+    return precisionMat;
 }
 
 // Function to embed watermark
@@ -444,7 +538,6 @@ Mat embed_watermark(
     resize(watermark, watermark_resized, Size(wm_width, wm_height), 0, 0, INTER_LINEAR);
     watermark_resized.convertTo(watermark_resized, CV_64F, 1.0 / 255.0); // Normalize
 
-
     //Save resized watermark image
     Mat save_watermark = watermark_resized.clone();
     normalize(save_watermark, save_watermark, 0, 255, NORM_MINMAX);
@@ -461,7 +554,7 @@ Mat embed_watermark(
     vector<Mat> original_Sc;
     // Embed watermark into selected blocks
     for (int idx = 0; idx < selected_blocks.size(); ++idx) {
-        Rect block_loc = selected_blocks[idx].location;
+        Rect block_loc = selected_blocks[idx].location; 
         Mat block = watermarked_image(block_loc).clone();
         // Perform DWT on the block
         Mat LL, LH, HL, HH;
@@ -498,19 +591,25 @@ Mat embed_watermark(
         // Replace the block in the watermarked image
         reconstructed_block.copyTo(watermarked_image(block_loc));
     }
-
+    
     saveMatVectorToFile(original_Sc, key_filename + "ori_s");
+    Mat watermarked_image_int;
+    watermarked_image.convertTo(watermarked_image_int, CV_8U);
+    Mat precision_obj = extractPrecisionDifference(watermarked_image_int, watermarked_image);
+    savePrecisionMat(precision_obj, key_filename + "_precision");
 
-    return watermarked_image;
+    return watermarked_image_int;
 }
 
 
-Mat extract_watermark(const Mat& watermarked_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11) {
+Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11) {
     // Load singular values and selected blocks
     Mat Uwm, Swm, Vtwm;
     vector<Block> selected_blocks = load_selected_blocks(key_filename + "_block");
     load_svd_components(key_filename +"wm_svd", Uwm, Swm, Vtwm);
     vector<Mat> ori_S  = loadMatVectorFromFile( key_filename + "ori_s"); 
+    Mat precision = loadPrecisionMat(key_filename + "_precision");
+    Mat watermarked_image = combineMatPrecision(watermarked_int_image, precision);
 
     // Initialize watermark image
     Mat extracted_watermark_S = Mat::zeros(Swm.size(), CV_64F);
@@ -562,7 +661,8 @@ int main() {
     double spatial_weight = 0.33;
 
     string original_image_path = "home.jpg";
-    string output_image_path = "watermarked_image.tiff";
+    string output_filename = "watermarked_image";
+    string output_image_path = output_filename + ".tiff";
     string watermark_image_path = "mono.png";
 
     if (!std::filesystem::exists(original_image_path)) {
@@ -605,28 +705,23 @@ int main() {
     double alpha = 5.11; // Embedding strength
 
     Mat watermarked_image = embed_watermark(
-        original_image, watermark_image, alpha, output_image_path,
+        original_image, watermark_image, alpha, output_filename,
         watermark_width, watermark_height,
         n_blocks_to_embed, block_size, spatial_weight
     );
 
-    // Display watermarked image
     namedWindow("Watermarked Image", WINDOW_NORMAL);
-    
+    imshow("Watermarked Image", watermarked_image);
+    waitKey(0);
+
     // Save watermarked image
-    bool isSaved = imwrite(output_image_path, watermarked_image);
+    bool isSaved = imwrite(output_image_path, watermarked_image, { cv::IMWRITE_TIFF_COMPRESSION, 1 });
     if (isSaved) {
         cout << "Watermarked image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save watermarked image." << endl;
     }
-    
-    normalize(watermarked_image, watermarked_image, 0, 255, NORM_MINMAX);
-    // Convert to 8-bit unsigned integer for display
-    watermarked_image.convertTo(watermarked_image, CV_8U);
-    imshow("Watermarked Image", watermarked_image);
-    waitKey(0);
 
     //Extraction
     if (!std::filesystem::exists(output_image_path)) {
@@ -640,7 +735,7 @@ int main() {
         return -1;
     }
 
-    Mat extracted_watermark = extract_watermark(ext_watermarked_image, output_image_path, 32, 4, alpha);
+    Mat extracted_watermark = extract_watermark(ext_watermarked_image, output_filename, n_blocks_to_embed, block_size, alpha);
     // Display the extracted watermark
     namedWindow("Extracted Watermark", WINDOW_NORMAL);
     imshow("Extracted Watermark", extracted_watermark);
