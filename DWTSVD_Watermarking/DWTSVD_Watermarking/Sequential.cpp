@@ -624,7 +624,7 @@ Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filena
     return extracted_watermark;
 }
 
-int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds *extract_time, bool isDisplay) {
+int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds *extract_time, bool isDisplay, string original_image_path, string watermark_image_path) {
     int original_width = 512;
     int original_height = 512;
     int watermark_width = 64;
@@ -633,10 +633,8 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
     int n_blocks_to_embed = 128;
     double spatial_weight = 0.33;
 
-    string original_image_path = "home.jpg";
     string output_filename = "watermarked_image";
     string output_image_path = output_filename + ".tiff";
-    string watermark_image_path = "mono.png";
 
     if (!std::filesystem::exists(original_image_path)) {
         std::cerr << "File does not exist: " << original_image_path << std::endl;

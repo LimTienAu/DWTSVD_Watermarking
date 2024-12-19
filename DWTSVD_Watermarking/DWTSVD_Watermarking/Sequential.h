@@ -1,9 +1,9 @@
 #pragma once
-#include "Sequential.h"
 #include <Eigen/Dense>
 #include <opencv2/opencv.hpp>
 #include <opencv2/core/eigen.hpp>
 
+#include <filesystem>
 #include <iostream>
 #include <vector>
 #include <cmath>
@@ -12,7 +12,6 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <filesystem>
 #include <chrono>
 
 using namespace cv;
@@ -89,4 +88,4 @@ Mat embed_watermark(
 
 Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11);
 
-int sequential(std::chrono::milliseconds* embed_time, std::chrono::milliseconds* extract_time, bool isDisplay = false);
+int sequential(std::chrono::milliseconds* embed_time, std::chrono::milliseconds* extract_time, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");

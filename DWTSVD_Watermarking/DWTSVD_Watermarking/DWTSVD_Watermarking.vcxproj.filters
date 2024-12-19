@@ -21,6 +21,9 @@
     <ClCompile Include="Runner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="cuda\Cuda.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -29,5 +32,11 @@
     <ClInclude Include="Sequential.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="cuda\Cuda.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <CudaCompile Include="cuda\File.cu" />
   </ItemGroup>
 </Project>
