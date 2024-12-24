@@ -148,7 +148,7 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="cuda\Cuda.cpp" />
+    <ClCompile Include="Cuda.cpp" />
     <ClCompile Include="Sequential.cpp" />
     <ClCompile Include="Runner.cpp" />
   </ItemGroup>
@@ -156,11 +156,10 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cuda\Cuda.h" />
+    <ClInclude Include="Common_include.h" />
+    <ClInclude Include="Cuda.h" />
+    <ClInclude Include="json.hpp" />
     <ClInclude Include="Sequential.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="cuda\File.cu" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -21,7 +21,7 @@
     <ClCompile Include="Runner.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="cuda\Cuda.cpp">
+    <ClCompile Include="Cuda.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,11 +32,14 @@
     <ClInclude Include="Sequential.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="cuda\Cuda.h">
+    <ClInclude Include="Cuda.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-  </ItemGroup>
-  <ItemGroup>
-    <CudaCompile Include="cuda\File.cu" />
+    <ClInclude Include="Common_include.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="json.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

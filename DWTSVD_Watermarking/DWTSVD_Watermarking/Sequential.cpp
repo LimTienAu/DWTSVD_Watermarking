@@ -247,7 +247,7 @@ void save_selected_blocks(const vector<Block>& selected_blocks, const string& ke
         }
 
         file.close();
-        std::cout << "Selected blocks information saved to " << key_file << std::endl;
+        //std::cout << "Selected blocks information saved to " << key_file << std::endl;
     }
     else {
         std::cerr << "Error: Could not save selected blocks to file." << std::endl;
@@ -380,7 +380,7 @@ cv::Mat loadPrecisionMat(const std::string& filename) {
 Mat embed_watermark(
     const Mat& original, const Mat& watermark, double alpha, 
     const string& key_filename, int wm_width, int wm_height,
-    int n_blocks_to_embed, int block_size, double spatial_weight
+    int n_blocks_to_embed, int block_size, double spatial_weight, std::chrono::milliseconds** execution_time
 ) {
     // Initialize variables
     Mat watermarked_image = original.clone();
@@ -389,6 +389,7 @@ Mat embed_watermark(
     // Initialize blank_image
     Mat blank_image = Mat::zeros(original.size(), CV_64F);
 
+    auto embed_begin = std::chrono::high_resolution_clock::now();
     // Apply various attacks and accumulate differences
     // 1. Gaussian Blur
     vector<double> blur_sigma_values = { 0.1, 0.5, 1, 2, 1.0, 2.0 };
@@ -509,6 +510,9 @@ Mat embed_watermark(
         selected_blocks.push_back(blocks_to_watermark[i]);
     }
 
+    auto embed_end = std::chrono::high_resolution_clock::now();
+    **execution_time = std::chrono::duration_cast<std::chrono::milliseconds>(embed_end - embed_begin);
+
     // Precompute SVD of the watermark
     wm_width = min(watermark.cols, wm_width); // Set max watermark size dynamically
     wm_height = min(watermark.rows, wm_height);
@@ -624,7 +628,7 @@ Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filena
     return extracted_watermark;
 }
 
-int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds *extract_time, bool isDisplay, string original_image_path, string watermark_image_path) {
+int sequential(std::chrono::milliseconds * execution_time, bool isDisplay, string original_image_path, string watermark_image_path) {
     int original_width = 512;
     int original_height = 512;
     int watermark_width = 64;
@@ -633,7 +637,7 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
     int n_blocks_to_embed = 128;
     double spatial_weight = 0.33;
 
-    string output_filename = "watermarked_image";
+    string output_filename = "serial_watermarked_image";
     string output_image_path = output_filename + ".tiff";
 
     if (!std::filesystem::exists(original_image_path)) {
@@ -651,7 +655,7 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
     // Resize original image to 512x512 if not already
     if (original_image.rows < original_height || original_image.cols < original_width) {
         resize(original_image, original_image, Size(original_height, original_width), 0, 0, INTER_LINEAR);
-        cout << "Original image resized to "<<original_width<<"x"<<original_height << endl;
+        //cout << "Original image resized to "<<original_width<<"x"<<original_height << endl;
     }
 
     if(isDisplay) {
@@ -665,7 +669,7 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
     // Save original resized image
     bool isSaved = imwrite("resized_" + original_image_path, original_image);
     if (isSaved) {
-        cout << "Original resized image saved as '" << output_image_path << "'." << endl;
+        //cout << "Original resized image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save Original resized image." << endl;
@@ -688,14 +692,11 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
 
     double alpha = 5.11; // Embedding strength
 
-    auto embed_begin = std::chrono::high_resolution_clock::now();
     Mat watermarked_image = embed_watermark(
         original_image, watermark_image, alpha, output_filename,
         watermark_width, watermark_height,
-        n_blocks_to_embed, block_size, spatial_weight
+        n_blocks_to_embed, block_size, spatial_weight, &execution_time
     );
-    auto embed_end = std::chrono::high_resolution_clock::now();
-    *embed_time = std::chrono::duration_cast<std::chrono::milliseconds>(embed_end - embed_begin);
 
     if (isDisplay) {
         namedWindow("Watermarked Image", WINDOW_NORMAL);
@@ -706,7 +707,7 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
     // Save watermarked image
     isSaved = imwrite(output_image_path, watermarked_image, { cv::IMWRITE_TIFF_COMPRESSION, 1 });
     if (isSaved) {
-        cout << "Watermarked image saved as '" << output_image_path << "'." << endl;
+        //cout << "Watermarked image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save watermarked image." << endl;
@@ -724,10 +725,7 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
         return -1;
     }
 
-    auto extract_begin = std::chrono::high_resolution_clock::now();
     Mat extracted_watermark = extract_watermark(ext_watermarked_image, output_filename, n_blocks_to_embed, block_size, alpha);
-    auto extract_end = std::chrono::high_resolution_clock::now();
-    *extract_time = std::chrono::duration_cast<std::chrono::milliseconds>(extract_end - extract_begin);
 
     if (isDisplay) {
         // Display the extracted watermark
@@ -740,7 +738,7 @@ int sequential(std::chrono::milliseconds *embed_time, std::chrono::milliseconds 
     string extracted_watermark_path = "extracted_watermark.png";
     bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
     if (isWatermarkSaved) {
-        cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
+        //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save the extracted watermark." << endl;

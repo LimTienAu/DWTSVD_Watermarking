@@ -1,29 +1,8 @@
 #pragma once
-#include <Eigen/Dense>
-#include <opencv2/opencv.hpp>
-#include <opencv2/core/eigen.hpp>
-
-#include <filesystem>
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <random>
-#include <algorithm>
-#include <fstream>
-#include <string>
-#include <sstream>
-#include <chrono>
+#include "Common_include.h"
 
 using namespace cv;
 using namespace std;
-
-// Structure to hold block information
-struct Block {
-    Rect location;
-    double spatial_value;
-    double attack_value;
-    double merit;
-};
 
 // Function to apply Gaussian blur
 Mat apply_blur(const Mat& img, double sigma);
@@ -83,9 +62,9 @@ cv::Mat loadPrecisionMat(const std::string& filename);
 Mat embed_watermark(
     const Mat& original, const Mat& watermark, double alpha,
     const string& key_filename, int wm_width = 32, int wm_height = 32,
-    int n_blocks_to_embed = 32, int block_size = 4, double spatial_weight = 0.33
+    int n_blocks_to_embed = 32, int block_size = 4, double spatial_weight = 0.33, std::chrono::milliseconds** execution_time = 0
 );
 
 Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11);
 
-int sequential(std::chrono::milliseconds* embed_time, std::chrono::milliseconds* extract_time, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");
+int sequential(std::chrono::milliseconds* execution_time, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");
