@@ -149,6 +149,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Cuda.cpp" />
+    <ClCompile Include="Omp.cpp" />
     <ClCompile Include="Sequential.cpp" />
     <ClCompile Include="Runner.cpp" />
   </ItemGroup>
@@ -160,6 +161,7 @@
     <ClInclude Include="Cuda.h" />
     <ClInclude Include="Cuda_embed.cuh" />
     <ClInclude Include="json.hpp" />
+    <ClInclude Include="ompwatermark.h" />
     <ClInclude Include="Sequential.h" />
   </ItemGroup>
   <ItemGroup>

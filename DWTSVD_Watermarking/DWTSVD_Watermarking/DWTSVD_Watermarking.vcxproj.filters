@@ -24,6 +24,9 @@
     <ClCompile Include="Cuda.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Omp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -42,6 +45,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Cuda_embed.cuh" />
+    <ClInclude Include="ompwatermark.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CudaCompile Include="Cuda_embed.cu" />

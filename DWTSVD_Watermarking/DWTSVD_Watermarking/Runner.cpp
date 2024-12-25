@@ -1,6 +1,7 @@
 #include "Sequential.h"
 #include "Cuda.h"
 #include "json.hpp"
+#include "ompwatermark.h"
 
 using json = nlohmann::json;
 
@@ -93,7 +94,7 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < loop; i++) {
         switch (type) {
         case 1:
-            //omp(&execution_time, false, original_image_path, watermark_image_path, watermark_width, watermark_height);
+            omp(&execution_time,&psnr, false, original_image_path, watermark_image_path, watermark_width, watermark_height);
             break;
         case 2:
             cuda_main(&execution_time, &psnr, false, original_image_path, watermark_image_path);
