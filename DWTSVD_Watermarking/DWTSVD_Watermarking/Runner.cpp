@@ -45,7 +45,7 @@ int main(int argc, char* argv[]) {
     std::chrono::milliseconds execution_time;
     string original_image_path = "home.jpg"; //"apollo-medium.jpg"
     string watermark_image_path = "mono.png";
-    double ave_execution_time, psnr=0;
+    double ave_execution_time, ave_psnr, psnr=0;
     int watermark_width = 64;
     int watermark_height = 64;
     int type = 2, loop = 3;
@@ -73,7 +73,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
     
-    vector<long> store_execution_time;
+    vector<long> store_execution_time, store_psnr;
     string type_name = "";
     switch (type) {
     case 1:
@@ -96,11 +96,7 @@ int main(int argc, char* argv[]) {
             //omp(&execution_time, false, original_image_path, watermark_image_path, watermark_width, watermark_height);
             break;
         case 2:
-            
-            sequential(&execution_time, &psnr, false, original_image_path, watermark_image_path);
-            cout << "             Exe seq : " << execution_time.count() << endl;
             cuda_main(&execution_time, &psnr, false, original_image_path, watermark_image_path);
-            cout << "             Exe cuda : " << execution_time.count() << endl;
             break;
         case 3:
             //mpi(&execution_time, false, original_image_path, watermark_image_path);
@@ -111,14 +107,18 @@ int main(int argc, char* argv[]) {
         }
         
         store_execution_time.push_back(execution_time.count());
+        store_psnr.push_back(psnr);
         cout << "Loop " << i + 1 << " " << type_name << " execution time: " << execution_time.count() << "ms" << endl;
     }
     long total_execution_time = 0;
+    double total_psnr = 0;
     for (int i = 0; i < loop; i++) {
         total_execution_time += store_execution_time[i];
+        total_psnr += store_psnr[i];
     }
     // Calculate the average times
     ave_execution_time = static_cast<double>(total_execution_time) / loop;
+    ave_psnr = total_psnr / loop;
 
     cout << endl<< type_name << " Average execution time: " << ave_execution_time << "ms. " << endl;
 
@@ -126,6 +126,7 @@ int main(int argc, char* argv[]) {
     output["method"] = type_name;
     output["ori_image_path"] = original_image_path;
     output["watermark_image_path"] = watermark_image_path;
+    output["psnr"] = ave_psnr;
     output["time"] = ave_execution_time;
 
     string json_file_path = "time_result.json";

@@ -178,5 +178,11 @@
         "ori_image_path": "home.jpg",
         "time": 235.0,
         "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "home.jpg",
+        "time": 196.33333333333334,
+        "watermark_image_path": "mono.png"
     }
 ]

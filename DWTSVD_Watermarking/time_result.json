@@ -1,0 +1,16 @@
+[
+    {
+        "method": "Serial",
+        "ori_image_path": "home.jpg",
+        "psnr": 45.0,
+        "time": 4608.666666666667,
+        "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "home.jpg",
+        "psnr": 45.0,
+        "time": 329.3333333333333,
+        "watermark_image_path": "mono.png"
+    }
+]
