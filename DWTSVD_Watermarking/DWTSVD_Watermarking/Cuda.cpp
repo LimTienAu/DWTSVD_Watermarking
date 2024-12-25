@@ -1,11 +1,6 @@
 #include "Cuda.h"
+#include "Cuda_embed.cuh"
 
-// Function to apply Gaussian blur
-Mat cuda_apply_blur(const Mat& img, double sigma) {
-    Mat blurred;
-    cv::GaussianBlur(img, blurred, Size(0, 0), sigma);
-    return blurred;
-}
 
 // Function to add Additive White Gaussian Noise (AWGN)
 Mat cuda_apply_awgn(const Mat& img, double stddev) {
@@ -380,7 +375,7 @@ cv::Mat cuda_loadPrecisionMat(const std::string& filename) {
 Mat cuda_embed_watermark(
     const Mat& original, const Mat& watermark, double alpha,
     const string& key_filename, int wm_width, int wm_height,
-    int n_blocks_to_embed, int block_size, double spatial_weight
+    int n_blocks_to_embed, int block_size, double spatial_weight, std::chrono::milliseconds** execution_time
 ) {
     // Initialize variables
     Mat watermarked_image = original.clone();
@@ -388,37 +383,15 @@ Mat cuda_embed_watermark(
 
     // Initialize blank_image
     Mat blank_image = Mat::zeros(original.size(), CV_64F);
+    auto embed_begin = std::chrono::high_resolution_clock::now();
+
+    vector<double> blur_sigma_values = { 0.1, 0.5, 1, 2, 1.0, 2.0 };
+    vector<int> median_kernel_sizes = { 3, 5, 7, 9, 11 };
+    vector<double> awgn_std_values = { 0.1, 0.5, 2, 5, 10 };
 
     // Apply various attacks and accumulate differences
-    // 1. Gaussian Blur
-    vector<double> blur_sigma_values = { 0.1, 0.5, 1, 2, 1.0, 2.0 };
-    for (auto sigma : blur_sigma_values) {
-        Mat attacked = cuda_apply_blur(original, sigma);
-        Mat diff;
-        absdiff(attacked, original, diff);
-        diff.convertTo(diff, CV_64F);
-        blank_image += diff;
-    }
-
-    // 2. Median Filtering
-    vector<int> median_kernel_sizes = { 3, 5, 7, 9, 11 };
-    for (auto k : median_kernel_sizes) {
-        Mat attacked = cuda_apply_median_filter(original, k);
-        Mat diff;
-        absdiff(attacked, original, diff);
-        diff.convertTo(diff, CV_64F);
-        blank_image += diff;
-    }
-
-    // 3. Additive White Gaussian Noise
-    vector<double> awgn_std_values = { 0.1, 0.5, 2, 5, 10 };
-    for (auto stddev : awgn_std_values) {
-        Mat attacked = cuda_apply_awgn(original, stddev);
-        Mat diff;
-        absdiff(attacked, original, diff);
-        diff.convertTo(diff, CV_64F);
-        blank_image += diff;
-    }
+    
+    processAllOperations(original, blank_image, blur_sigma_values, median_kernel_sizes, awgn_std_values);
 
     // 4. Sharpening
     vector<double> sharpen_sigma_values = { 0.1, 0.5, 2, 100 };
@@ -507,7 +480,12 @@ Mat cuda_embed_watermark(
     vector<Block> selected_blocks;
     for (int i = 0; i < min(n_blocks_to_embed, (int)blocks_to_watermark.size()); ++i) {
         selected_blocks.push_back(blocks_to_watermark[i]);
+
+        //cout << blocks_to_watermark[i].location << endl;
     }
+
+    auto embed_end = std::chrono::high_resolution_clock::now();
+    **execution_time = std::chrono::duration_cast<std::chrono::milliseconds>(embed_end - embed_begin);
 
     // Precompute SVD of the watermark
     wm_width = min(watermark.cols, wm_width); // Set max watermark size dynamically
@@ -624,7 +602,7 @@ Mat cuda_extract_watermark(const Mat& watermarked_int_image, const string& key_f
     return extracted_watermark;
 }
 
-int cuda_main(std::chrono::milliseconds* execution_time, bool isDisplay, string original_image_path, string watermark_image_path) {
+int cuda_main(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay, string original_image_path, string watermark_image_path) {
     int original_width = 512;
     int original_height = 512;
     int watermark_width = 64;
@@ -691,7 +669,7 @@ int cuda_main(std::chrono::milliseconds* execution_time, bool isDisplay, string 
     Mat watermarked_image = cuda_embed_watermark(
         original_image, watermark_image, alpha, output_filename,
         watermark_width, watermark_height,
-        n_blocks_to_embed, block_size, spatial_weight
+        n_blocks_to_embed, block_size, spatial_weight, &execution_time
     );
 
     if (isDisplay) {
@@ -708,6 +686,12 @@ int cuda_main(std::chrono::milliseconds* execution_time, bool isDisplay, string 
     else {
         cerr << "Error: Could not save watermarked image." << endl;
     }
+
+    //PSNR after Embedding
+    Mat ori = imread("resized_" + original_image_path, IMREAD_UNCHANGED);
+    Mat wm = imread(output_image_path, IMREAD_UNCHANGED);
+    *psnr = PSNR(ori, wm);
+    cout << "CUDA PSNR embedding : " << *psnr << endl;
 
     //Extraction
     if (!std::filesystem::exists(output_image_path)) {

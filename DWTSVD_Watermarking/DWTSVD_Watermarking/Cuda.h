@@ -5,9 +5,6 @@ using namespace cv;
 using namespace std;
 
 
-// Function to apply Gaussian blur
-Mat cuda_apply_blur(const Mat& img, double sigma);
-
 // Function to add Additive White Gaussian Noise (AWGN)
 Mat cuda_apply_awgn(const Mat& img, double stddev);
 
@@ -68,4 +65,4 @@ Mat cuda_embed_watermark(
 
 Mat cuda_extract_watermark(const Mat& watermarked_int_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11);
 
-int cuda_main(std::chrono::milliseconds* execution_time, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");
+int cuda_main(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");

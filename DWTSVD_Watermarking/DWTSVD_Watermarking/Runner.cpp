@@ -43,12 +43,12 @@ void append_to_json(const string& file_path, const json& new_data) {
 int main(int argc, char* argv[]) {
 
     std::chrono::milliseconds execution_time;
-    string original_image_path = "home.jpg";
+    string original_image_path = "apollo-medium.jpg";
     string watermark_image_path = "mono.png";
-    double ave_execution_time;
+    double ave_execution_time, psnr=0;
     int watermark_width = 64;
     int watermark_height = 64;
-    int type = 0, loop = 3;
+    int type = 2, loop = 3;
 
     if (argc > 1 && argc != 7) {
         cerr << "Usage: " << argv[0] << " <original_image_path> <watermark_image_path> <watermark_width> <watermark_height> <type> <loop_number>" << endl;
@@ -96,14 +96,18 @@ int main(int argc, char* argv[]) {
             //omp(&execution_time, false, original_image_path, watermark_image_path, watermark_width, watermark_height);
             break;
         case 2:
-            cuda_main(&execution_time,false, original_image_path, watermark_image_path);
+            
+            sequential(&execution_time, &psnr, false, original_image_path, watermark_image_path);
+            cout << "             Exe seq : " << execution_time.count() << endl;
+            cuda_main(&execution_time, &psnr, true, original_image_path, watermark_image_path);
+            cout << "             Exe cuda : " << execution_time.count() << endl;
             break;
         case 3:
             //mpi(&execution_time, false, original_image_path, watermark_image_path);
             break;
         case 0:
         default:
-            sequential(&execution_time, false, original_image_path, watermark_image_path);
+            sequential(&execution_time, &psnr, false, original_image_path, watermark_image_path);
         }
         
         store_execution_time.push_back(execution_time.count());
@@ -117,6 +121,16 @@ int main(int argc, char* argv[]) {
     ave_execution_time = static_cast<double>(total_execution_time) / loop;
 
     cout << endl<< type_name << " Average execution time: " << ave_execution_time << "ms. " << endl;
+
+    json output;
+    output["method"] = type_name;
+    output["ori_image_path"] = original_image_path;
+    output["watermark_image_path"] = watermark_image_path;
+    output["time"] = ave_execution_time;
+
+    string json_file_path = "time_result.json";
+
+    append_to_json(json_file_path, output);
     return 0;
 }
 

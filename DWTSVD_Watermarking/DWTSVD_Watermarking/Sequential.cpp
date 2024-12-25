@@ -400,7 +400,7 @@ Mat embed_watermark(
         diff.convertTo(diff, CV_64F);
         blank_image += diff;
     }
-
+    
     // 2. Median Filtering
     vector<int> median_kernel_sizes = { 3, 5, 7, 9, 11 };
     for (auto k : median_kernel_sizes) {
@@ -508,6 +508,8 @@ Mat embed_watermark(
     vector<Block> selected_blocks;
     for (int i = 0; i < min(n_blocks_to_embed, (int)blocks_to_watermark.size()); ++i) {
         selected_blocks.push_back(blocks_to_watermark[i]);
+
+        //cout << blocks_to_watermark[i].location << endl;
     }
 
     auto embed_end = std::chrono::high_resolution_clock::now();
@@ -628,7 +630,7 @@ Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filena
     return extracted_watermark;
 }
 
-int sequential(std::chrono::milliseconds * execution_time, bool isDisplay, string original_image_path, string watermark_image_path) {
+int sequential(std::chrono::milliseconds * execution_time, double* psnr, bool isDisplay, string original_image_path, string watermark_image_path) {
     int original_width = 512;
     int original_height = 512;
     int watermark_width = 64;
@@ -712,6 +714,12 @@ int sequential(std::chrono::milliseconds * execution_time, bool isDisplay, strin
     else {
         cerr << "Error: Could not save watermarked image." << endl;
     }
+
+    //PSNR after Embedding
+    Mat ori = imread("resized_" + original_image_path, IMREAD_UNCHANGED);
+    Mat wm = imread(output_image_path, IMREAD_UNCHANGED);
+    *psnr = PSNR(ori, wm);
+    cout << "Sequential PSNR embedding : " << *psnr << endl;
 
     //Extraction
     if (!std::filesystem::exists(output_image_path)) {

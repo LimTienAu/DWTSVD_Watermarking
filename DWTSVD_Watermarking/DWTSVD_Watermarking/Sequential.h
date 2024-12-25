@@ -67,4 +67,4 @@ Mat embed_watermark(
 
 Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11);
 
-int sequential(std::chrono::milliseconds* execution_time, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");
+int sequential(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");
