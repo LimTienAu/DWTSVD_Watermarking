@@ -43,7 +43,7 @@ void append_to_json(const string& file_path, const json& new_data) {
 int main(int argc, char* argv[]) {
 
     std::chrono::milliseconds execution_time;
-    string original_image_path = "apollo-medium.jpg";
+    string original_image_path = "home.jpg"; //"apollo-medium.jpg"
     string watermark_image_path = "mono.png";
     double ave_execution_time, psnr=0;
     int watermark_width = 64;
@@ -99,7 +99,7 @@ int main(int argc, char* argv[]) {
             
             sequential(&execution_time, &psnr, false, original_image_path, watermark_image_path);
             cout << "             Exe seq : " << execution_time.count() << endl;
-            cuda_main(&execution_time, &psnr, true, original_image_path, watermark_image_path);
+            cuda_main(&execution_time, &psnr, false, original_image_path, watermark_image_path);
             cout << "             Exe cuda : " << execution_time.count() << endl;
             break;
         case 3:

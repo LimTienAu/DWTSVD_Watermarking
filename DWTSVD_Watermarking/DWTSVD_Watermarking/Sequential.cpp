@@ -1,9 +1,78 @@
 #include "Sequential.h"
+#define PI 355.0 / 113.0
+
+
+//Mat apply_blur(const Mat& img, double sigma) {
+//    Mat blurred;
+//    cv::GaussianBlur(img, blurred, Size(0, 0), sigma);
+//    return blurred;
+//}
+//Mat apply_resize(const Mat& img, double scale) {
+//    Mat resized, restored;
+//    resize(img, resized, Size(), scale, scale, INTER_LINEAR);
+//    resize(resized, restored, img.size(), 0, 0, INTER_LINEAR);
+//    return restored;
+//}
+
+// Helper function to create a Gaussian kernel
+vector<vector<double>> createGaussianKernel(int kernelSize, double sigma) {
+    vector<vector<double>> kernel(kernelSize, vector<double>(kernelSize));
+    double sum = 0.0;
+    int halfSize = kernelSize / 2;
+
+    for (int i = -halfSize; i <= halfSize; ++i) {
+        for (int j = -halfSize; j <= halfSize; ++j) {
+            kernel[i + halfSize][j + halfSize] = exp(-(i * i + j * j) / (2 * sigma * sigma)) / (2 * PI * sigma * sigma);
+            sum += kernel[i + halfSize][j + halfSize];
+        }
+    }
+
+    // Normalize the kernel
+    for (int i = 0; i < kernelSize; ++i) {
+        for (int j = 0; j < kernelSize; ++j) {
+            kernel[i][j] /= sum;
+        }
+    }
+
+    return kernel;
+}
 
 // Function to apply Gaussian blur
 Mat apply_blur(const Mat& img, double sigma) {
-    Mat blurred;
-    cv::GaussianBlur(img, blurred, Size(0, 0), sigma);
+    // Ensure the input image is single-channel (grayscale) or handle each channel separately for colored images
+    CV_Assert(img.channels() == 1);
+
+    int kernelSize = (int)(ceil((20.0 / 3.0) * sigma - 1.0 / 3.0)); // Kernel size based on sigma
+    kernelSize = (kernelSize % 2 == 0) ? kernelSize + 1 : kernelSize;
+    int halfSize = kernelSize / 2;
+
+    // Create Gaussian kernel
+    vector<vector<double>> kernel = createGaussianKernel(kernelSize, sigma);
+
+    // Create output Mat
+    Mat blurred = Mat::zeros(img.size(), img.type());
+
+    // Convolution
+    for (int i = 0; i < img.rows; ++i) {
+        for (int j = 0; j < img.cols; ++j) {
+            double sum = 0.0;
+
+            for (int ki = -halfSize; ki <= halfSize; ++ki) {
+                for (int kj = -halfSize; kj <= halfSize; ++kj) {
+                    int ni = i + ki;
+                    int nj = j + kj;
+
+                    // Check boundaries
+                    if (ni >= 0 && ni < img.rows && nj >= 0 && nj < img.cols) {
+                        sum += img.at<uint8_t>(ni, nj) * kernel[ki + halfSize][kj + halfSize];
+                    }
+                }
+            }
+
+            blurred.at<uint8_t>(i, j) = static_cast<uint8_t>(round(sum));
+        }
+    }
+
     return blurred;
 }
 
@@ -38,11 +107,53 @@ Mat apply_sharpen(const Mat& img, double sigma, double alpha) {
     return sharpened;
 }
 
-// Function to resize image (downscale and upscale)
+// Function to perform bilinear interpolation
+double bilinearInterpolate(const Mat& img, double x, double y) {
+    int x1 = static_cast<int>(x);
+    int y1 = static_cast<int>(y);
+    int x2 = std::min(x1 + 1, img.cols - 1);
+    int y2 = std::min(y1 + 1, img.rows - 1);
+
+    double dx = x - x1;
+    double dy = y - y1;
+
+    double val = (1 - dx) * (1 - dy) * img.at<uint8_t>(y1, x1) +
+        dx * (1 - dy) * img.at<uint8_t>(y1, x2) +
+        (1 - dx) * dy * img.at<uint8_t>(y2, x1) +
+        dx * dy * img.at<uint8_t>(y2, x2);
+
+    return val;
+}
+
+// Function to resize an image to a new size
+Mat resizeImage(const Mat& img, int newRows, int newCols) {
+    Mat resized(newRows, newCols, img.type());
+    double rowScale = static_cast<double>(img.rows) / newRows;
+    double colScale = static_cast<double>(img.cols) / newCols;
+
+    for (int r = 0; r < newRows; ++r) {
+        for (int c = 0; c < newCols; ++c) {
+            double origY = r * rowScale;
+            double origX = c * colScale;
+
+            resized.at<uint8_t>(r, c) = static_cast<uint8_t>(bilinearInterpolate(img, origX, origY));
+        }
+    }
+
+    return resized;
+}
+
+// Function to apply resizing and restoring
 Mat apply_resize(const Mat& img, double scale) {
-    Mat resized, restored;
-    resize(img, resized, Size(), scale, scale, INTER_LINEAR);
-    resize(resized, restored, img.size(), 0, 0, INTER_LINEAR);
+    int resizedRows = static_cast<int>(img.rows * scale);
+    int resizedCols = static_cast<int>(img.cols * scale);
+
+    // Resize the image using custom implementation
+    Mat resized = resizeImage(img, resizedRows, resizedCols);
+
+    // Restore the image to the original size
+    Mat restored = resizeImage(resized, img.rows, img.cols);
+
     return restored;
 }
 
@@ -410,6 +521,7 @@ Mat embed_watermark(
         diff.convertTo(diff, CV_64F);
         blank_image += diff;
     }
+    
 
     // 3. Additive White Gaussian Noise
     vector<double> awgn_std_values = { 0.1, 0.5, 2, 5, 10 };
@@ -508,8 +620,6 @@ Mat embed_watermark(
     vector<Block> selected_blocks;
     for (int i = 0; i < min(n_blocks_to_embed, (int)blocks_to_watermark.size()); ++i) {
         selected_blocks.push_back(blocks_to_watermark[i]);
-
-        //cout << blocks_to_watermark[i].location << endl;
     }
 
     auto embed_end = std::chrono::high_resolution_clock::now();
@@ -570,7 +680,7 @@ Mat embed_watermark(
         reconstruct_matrix(Uc, Sc, Vtc, modified_LL);
         
         inverse_haar_wavelet_transform(modified_LL, LH, HL, HH, reconstructed_block);
-        // Replace the block in the watermarked image
+        //reconstructed_block.setTo(cv::Scalar(255));  //For displaying where the selected block are
         reconstructed_block.copyTo(watermarked_image(block_loc));
     }
     

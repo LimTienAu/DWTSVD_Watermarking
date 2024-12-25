@@ -5,18 +5,6 @@ using namespace cv;
 using namespace std;
 
 
-// Function to add Additive White Gaussian Noise (AWGN)
-Mat cuda_apply_awgn(const Mat& img, double stddev);
-
-// Function to apply median filtering
-Mat cuda_apply_median_filter(const Mat& img, int kernel_size);
-
-// Function to apply sharpening
-Mat cuda_apply_sharpen(const Mat& img, double sigma, double alpha);
-
-// Function to resize image (downscale and upscale)
-Mat cuda_apply_resize(const Mat& img, double scale);
-
 // Function to perform Haar Wavelet Transform (DWT)
 void cuda_haar_wavelet_transform(const Mat& src, Mat& LL, Mat& LH, Mat& HL, Mat& HH);
 

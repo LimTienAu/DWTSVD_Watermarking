@@ -148,5 +148,35 @@
         "ori_image_path": "apollo-medium.jpg",
         "time": 6779.666666666667,
         "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "apollo-medium.jpg",
+        "time": 567.3333333333334,
+        "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "home.jpg",
+        "time": 66.0,
+        "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "home.jpg",
+        "time": 99.66666666666667,
+        "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "home.jpg",
+        "time": 274.0,
+        "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "CUDA",
+        "ori_image_path": "home.jpg",
+        "time": 235.0,
+        "watermark_image_path": "mono.png"
     }
 ]

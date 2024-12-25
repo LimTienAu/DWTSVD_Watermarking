@@ -1,5 +1,6 @@
 #pragma once
 #include "Common_include.h"
+#include <math.h>
 
 using namespace cv;
 using namespace std;

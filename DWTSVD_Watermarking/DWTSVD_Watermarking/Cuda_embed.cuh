@@ -6,4 +6,7 @@
 void processAllOperations(const cv::Mat& input, cv::Mat& diff_accum,
     const std::vector<double>& blur_sigmas,
     const std::vector<int>& median_kernels,
-    const std::vector<double>& noise_stddevs);
+    const std::vector<double>& noise_stddevs,
+    const std::vector<double>& sharpen_sigma_values,
+    const std::vector<double>& sharpen_alpha_values,
+    const std::vector<double>& resize_scale_values);

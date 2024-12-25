@@ -2,45 +2,6 @@
 #include "Cuda_embed.cuh"
 
 
-// Function to add Additive White Gaussian Noise (AWGN)
-Mat cuda_apply_awgn(const Mat& img, double stddev) {
-    Mat noise = Mat(img.size(), CV_64F);
-    randn(noise, 0, stddev);
-    Mat noisy_img;
-    img.convertTo(noisy_img, CV_64F);
-    noisy_img += noise;
-    noisy_img = max(noisy_img, 0.0);
-    noisy_img = min(noisy_img, 255.0);
-    noisy_img.convertTo(noisy_img, CV_8U);
-    return noisy_img;
-}
-
-// Function to apply median filtering
-Mat cuda_apply_median_filter(const Mat& img, int kernel_size) {
-    Mat filtered;
-    medianBlur(img, filtered, kernel_size);
-    return filtered;
-}
-
-// Function to apply sharpening
-Mat cuda_apply_sharpen(const Mat& img, double sigma, double alpha) {
-    Mat blurred, sharpened;
-    GaussianBlur(img, blurred, Size(0, 0), sigma);
-    sharpened = img + alpha * (img - blurred);
-    sharpened = max(sharpened, 0.0);
-    sharpened = min(sharpened, 255.0);
-    sharpened.convertTo(sharpened, CV_8U);
-    return sharpened;
-}
-
-// Function to resize image (downscale and upscale)
-Mat cuda_apply_resize(const Mat& img, double scale) {
-    Mat resized, restored;
-    resize(img, resized, Size(), scale, scale, INTER_LINEAR);
-    resize(resized, restored, img.size(), 0, 0, INTER_LINEAR);
-    return restored;
-}
-
 // Function to perform Haar Wavelet Transform (DWT)
 void cuda_haar_wavelet_transform(const Mat& src, Mat& LL, Mat& LH, Mat& HL, Mat& HH) {
     int rows = src.rows / 2;
@@ -388,33 +349,26 @@ Mat cuda_embed_watermark(
     vector<double> blur_sigma_values = { 0.1, 0.5, 1, 2, 1.0, 2.0 };
     vector<int> median_kernel_sizes = { 3, 5, 7, 9, 11 };
     vector<double> awgn_std_values = { 0.1, 0.5, 2, 5, 10 };
-
-    // Apply various attacks and accumulate differences
-    
-    processAllOperations(original, blank_image, blur_sigma_values, median_kernel_sizes, awgn_std_values);
-
-    // 4. Sharpening
     vector<double> sharpen_sigma_values = { 0.1, 0.5, 2, 100 };
     vector<double> sharpen_alpha_values = { 0.1, 0.5, 1, 2 };
-    for (auto sigma : sharpen_sigma_values) {
-        for (auto a : sharpen_alpha_values) {
-            Mat attacked = cuda_apply_sharpen(original, sigma, a);
-            Mat diff;
-            absdiff(attacked, original, diff);
-            diff.convertTo(diff, CV_64F);
-            blank_image += diff;
-        }
-    }
-
-    // 5. Resizing
     vector<double> resize_scale_values = { 0.5, 0.75, 0.9, 1.1, 1.5 };
-    for (auto scale : resize_scale_values) {
-        Mat attacked = cuda_apply_resize(original, scale);
-        Mat diff;
-        absdiff(attacked, original, diff);
-        diff.convertTo(diff, CV_64F);
-        blank_image += diff;
-    }
+    // Apply various attacks and accumulate differences
+    
+    processAllOperations(original, blank_image, blur_sigma_values, median_kernel_sizes, 
+        awgn_std_values, sharpen_sigma_values, sharpen_alpha_values, resize_scale_values);
+
+    /* {
+        int count = 0;
+        // Iterate through the matrix
+        for (int i = 0; i < blank_image.rows; ++i) {
+            for (int j = 0; j < blank_image.cols; ++j) {
+                if (blank_image.at<double>(i, j) != 0) {
+                    count++;
+                }
+            }
+        }
+        cout << "Count : " << count << endl;
+    }*/
 
     // Block selection based on spatial and attack values
     vector<Block> blocks_to_watermark;
@@ -480,8 +434,6 @@ Mat cuda_embed_watermark(
     vector<Block> selected_blocks;
     for (int i = 0; i < min(n_blocks_to_embed, (int)blocks_to_watermark.size()); ++i) {
         selected_blocks.push_back(blocks_to_watermark[i]);
-
-        //cout << blocks_to_watermark[i].location << endl;
     }
 
     auto embed_end = std::chrono::high_resolution_clock::now();
@@ -542,7 +494,8 @@ Mat cuda_embed_watermark(
         cuda_reconstruct_matrix(Uc, Sc, Vtc, modified_LL);
 
         cuda_inverse_haar_wavelet_transform(modified_LL, LH, HL, HH, reconstructed_block);
-        // Replace the block in the watermarked image
+
+        //reconstructed_block.setTo(cv::Scalar(255));  //For displaying where the selected block are
         reconstructed_block.copyTo(watermarked_image(block_loc));
     }
 
