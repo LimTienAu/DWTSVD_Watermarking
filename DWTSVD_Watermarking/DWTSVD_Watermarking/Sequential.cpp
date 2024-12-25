@@ -534,7 +534,7 @@ Mat embed_watermark(
     }
 
     // 4. Sharpening
-    vector<double> sharpen_sigma_values = { 0.1, 0.5, 2, 100 };
+    vector<double> sharpen_sigma_values = { 0.1, 0.5, 2, 10 };
     vector<double> sharpen_alpha_values = { 0.1, 0.5, 1, 2 };
     for (auto sigma : sharpen_sigma_values) {
         for (auto a : sharpen_alpha_values) {

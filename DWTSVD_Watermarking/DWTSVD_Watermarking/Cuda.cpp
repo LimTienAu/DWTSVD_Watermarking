@@ -349,7 +349,7 @@ Mat cuda_embed_watermark(
     vector<double> blur_sigma_values = { 0.1, 0.5, 1, 2, 1.0, 2.0 };
     vector<int> median_kernel_sizes = { 3, 5, 7, 9, 11 };
     vector<double> awgn_std_values = { 0.1, 0.5, 2, 5, 10 };
-    vector<double> sharpen_sigma_values = { 0.1, 0.5, 2, 100 };
+    vector<double> sharpen_sigma_values = { 0.1, 0.5, 2, 10 };
     vector<double> sharpen_alpha_values = { 0.1, 0.5, 1, 2 };
     vector<double> resize_scale_values = { 0.5, 0.75, 0.9, 1.1, 1.5 };
     // Apply various attacks and accumulate differences
