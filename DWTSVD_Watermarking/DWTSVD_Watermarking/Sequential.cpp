@@ -78,7 +78,7 @@ Mat apply_blur(const Mat& img, double sigma) {
 
 // Function to add Additive White Gaussian Noise (AWGN)
 Mat apply_awgn(const Mat& img, double stddev) {
-    Mat noise = Mat(img.size(), CV_64F);
+    /*Mat noise = Mat(img.size(), CV_64F);
     randn(noise, 0, stddev);
     Mat noisy_img;
     img.convertTo(noisy_img, CV_64F);
@@ -86,24 +86,141 @@ Mat apply_awgn(const Mat& img, double stddev) {
     noisy_img = max(noisy_img, 0.0);
     noisy_img = min(noisy_img, 255.0);
     noisy_img.convertTo(noisy_img, CV_8U);
+    return noisy_img;*/
+    // Create a noise matrix of type double for precision
+    Mat noise(img.size(), CV_64F);
+
+    // Initialize Gaussian noise with mean=0 and standard deviation=stddev
+    randn(noise, 0, stddev);
+
+    // Convert the input image to double for precise addition
+    Mat noisy_img;
+    img.convertTo(noisy_img, CV_64F);
+
+    int rows = noisy_img.rows;
+    int cols = noisy_img.cols;
+
+    // addition of noise
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            // Add noise to each pixel
+            noisy_img.at<double>(i, j) += noise.at<double>(i, j);
+
+            // Clamp the pixel values to the range [0, 255]
+            noisy_img.at<double>(i, j) = std::min(std::max(noisy_img.at<double>(i, j), 0.0), 255.0);
+        }
+    }
+
+    // Convert the noisy image back to 8-bit unsigned integer type
+    noisy_img.convertTo(noisy_img, CV_8U);
+
     return noisy_img;
 }
 
 // Function to apply median filtering
 Mat apply_median_filter(const Mat& img, int kernel_size) {
-    Mat filtered;
+    /*Mat filtered;
     medianBlur(img, filtered, kernel_size);
+    return filtered;*/
+
+    // Calculate the border size based on the kernel size
+    int border = kernel_size / 2;
+
+    // Pad the image to handle borders using reflection
+    Mat padded;
+    copyMakeBorder(img, padded, border, border, border, border, BORDER_REFLECT);
+
+    // Initialize the filtered image as a clone of the original
+    Mat filtered = img.clone();
+
+    int rows = img.rows;
+    int cols = img.cols;
+
+    // Iterate over each pixel in the image
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            // Vector to store the neighborhood pixel values
+            vector<uchar> neighborhood;
+            neighborhood.reserve(kernel_size * kernel_size);
+
+            // Collect the neighborhood pixels
+            for (int m = -border; m <= border; ++m) {
+                for (int n = -border; n <= border; ++n) {
+                    uchar pixel = padded.at<uchar>(i + border + m, j + border + n);
+                    neighborhood.push_back(pixel);
+                }
+            }
+
+            // Find the median using nth_element (does not fully sort the vector)
+            size_t mid = neighborhood.size() / 2;
+            nth_element(neighborhood.begin(), neighborhood.begin() + mid, neighborhood.end());
+            uchar median = neighborhood[mid];
+
+            // Assign the median value to the filtered image
+            filtered.at<uchar>(i, j) = median;
+        }
+    }
+
     return filtered;
 }
 
 // Function to apply sharpening
 Mat apply_sharpen(const Mat& img, double sigma, double alpha) {
-    Mat blurred, sharpened;
+    /*Mat blurred, sharpened;
     GaussianBlur(img, blurred, Size(0, 0), sigma);
     sharpened = img + alpha * (img - blurred);
     sharpened = max(sharpened, 0.0);
     sharpened = min(sharpened, 255.0);
     sharpened.convertTo(sharpened, CV_8U);
+    return sharpened;*/
+
+    // Determine the kernel size based on sigma (common choice: 6*sigma +1)
+    int kernel_size = static_cast<int>(std::ceil(6 * sigma)) | 1; // Ensure kernel_size is odd
+
+    // Create Gaussian kernel
+    std::vector<std::vector<double>> gaussian_kernel = omp_createGaussianKernel(kernel_size, sigma);
+    int half = kernel_size / 2;
+
+    // Pad the image to handle borders
+    Mat padded;
+    copyMakeBorder(img, padded, half, half, half, half, BORDER_REFLECT);
+
+    // Initialize blurred image
+    Mat blurred = Mat::zeros(img.size(), CV_64F);
+
+    int rows = img.rows;
+    int cols = img.cols;
+
+    // Gaussian blur process 
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            double accum = 0.0;
+            for (int m = -half; m <= half; ++m) {
+                for (int n = -half; n <= half; ++n) {
+                    uchar pixel = padded.at<uchar>(i + half + m, j + half + n);
+                    accum += pixel * gaussian_kernel[m + half][n + half];
+                }
+            }
+            blurred.at<double>(i, j) = accum;
+        }
+    }
+
+    // Convert original image to double for precise calculations
+    Mat img_double;
+    img.convertTo(img_double, CV_64F);
+
+    // Apply the sharpening formula: sharpened = original + alpha * (original - blurred)
+    Mat sharpened = img_double + alpha * (img_double - blurred);
+
+    // Clamp the pixel values to the range [0, 255] and convert back to 8-bit
+    for (int i = 0; i < rows; ++i) {
+        for (int j = 0; j < cols; ++j) {
+            sharpened.at<double>(i, j) = std::min(std::max(sharpened.at<double>(i, j), 0.0), 255.0);
+        }
+    }
+
+    sharpened.convertTo(sharpened, CV_8U);
+
     return sharpened;
 }
 
