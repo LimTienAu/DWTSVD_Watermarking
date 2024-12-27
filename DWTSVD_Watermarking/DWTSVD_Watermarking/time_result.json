@@ -184,5 +184,12 @@
         "ori_image_path": "home.jpg",
         "time": 196.33333333333334,
         "watermark_image_path": "mono.png"
+    },
+    {
+        "method": "Serial",
+        "ori_image_path": "home.jpg",
+        "psnr": 45.0,
+        "time": 510.3333333333333,
+        "watermark_image_path": "mono.png"
     }
 ]

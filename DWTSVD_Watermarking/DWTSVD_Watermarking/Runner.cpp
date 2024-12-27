@@ -44,12 +44,12 @@ void append_to_json(const string& file_path, const json& new_data) {
 int main(int argc, char* argv[]) {
 
     std::chrono::milliseconds execution_time;
-    string original_image_path = "home.jpg"; //"apollo-medium.jpg"
+    string original_image_path = "apollo-medium.jpg"; //"apollo-medium.jpg"
     string watermark_image_path = "mono.png";
     double ave_execution_time, ave_psnr, psnr=0;
     int watermark_width = 64;
     int watermark_height = 64;
-    int type = 2, loop = 3;
+    int type = 0, loop = 3;
 
     if (argc > 1 && argc != 7) {
         cerr << "Usage: " << argv[0] << " <original_image_path> <watermark_image_path> <watermark_width> <watermark_height> <type> <loop_number>" << endl;

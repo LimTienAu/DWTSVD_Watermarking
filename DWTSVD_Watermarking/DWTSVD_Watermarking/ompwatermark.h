@@ -12,20 +12,13 @@
 #include <fstream>
 #include <string>
 #include <sstream>
-#include <chrono>
-#include <stdexcept>
+#include "Common_include.h"
+
 #include <omp.h>
+#include <stdexcept>
 
 using namespace cv;
 using namespace std;
-
-// Structure to hold block information
-struct Block {
-    Rect location;
-    double spatial_value;
-    double attack_value;
-    double merit;
-};
 
 // Function to apply Gaussian blur
 vector<vector<double>> omp_createGaussianKernel(int kernelSize, double sigma);

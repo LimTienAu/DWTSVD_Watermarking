@@ -178,7 +178,7 @@ Mat apply_sharpen(const Mat& img, double sigma, double alpha) {
     int kernel_size = static_cast<int>(std::ceil(6 * sigma)) | 1; // Ensure kernel_size is odd
 
     // Create Gaussian kernel
-    std::vector<std::vector<double>> gaussian_kernel = omp_createGaussianKernel(kernel_size, sigma);
+    std::vector<std::vector<double>> gaussian_kernel = createGaussianKernel(kernel_size, sigma);
     int half = kernel_size / 2;
 
     // Pad the image to handle borders
@@ -898,7 +898,7 @@ int sequential(std::chrono::milliseconds * execution_time, double* psnr, bool is
     // Save original resized image
     bool isSaved = imwrite("resized_" + original_image_path, original_image);
     if (isSaved) {
-        //cout << "Original resized image saved as '" << output_image_path << "'." << endl;
+        cout << "Original resized image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save Original resized image." << endl;

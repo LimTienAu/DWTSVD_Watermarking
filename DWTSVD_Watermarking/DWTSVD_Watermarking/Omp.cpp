@@ -425,7 +425,7 @@ void omp_save_singular_values(const Mat& S, const string& key_file) {
         file.write((char*)&cols, sizeof(int));
         file.write((char*)S.data, rows * cols * sizeof(double));
         file.close();
-        cout << "Secret key (singular values) saved to " << key_file << endl;
+       // cout << "Secret key (singular values) saved to " << key_file << endl;
     }
     else {
         cerr << "Error: Could not save singular values to file." << endl;
@@ -471,7 +471,7 @@ void omp_save_selected_blocks(const vector<Block>& selected_blocks, const string
         }
 
         file.close();
-        std::cout << "Selected blocks information saved to " << key_file << std::endl;
+        //std::cout << "Selected blocks information saved to " << key_file << std::endl;
     }
     else {
         std::cerr << "Error: Could not save selected blocks to file." << std::endl;
@@ -922,7 +922,7 @@ int omp(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay,
     // Resize original image to 512x512 if not already
     if (original_image.rows < original_height || original_image.cols < original_width) {
         resize(original_image, original_image, Size(original_height, original_width), 0, 0, INTER_LINEAR);
-        cout << "Original image resized to " << original_width << "x" << original_height << endl;
+        //cout << "Original image resized to " << original_width << "x" << original_height << endl;
     }
 
     if (isDisplay) {
@@ -936,7 +936,7 @@ int omp(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay,
     // Save original resized image
     bool isSaved = imwrite("resized_" + original_image_path, original_image);
     if (isSaved) {
-        cout << "Original resized image saved as '" << output_image_path << "'." << endl;
+        //cout << "Original resized image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save Original resized image." << endl;
@@ -977,7 +977,7 @@ int omp(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay,
     // Save watermarked image
     isSaved = imwrite(output_image_path, watermarked_image, { cv::IMWRITE_TIFF_COMPRESSION, 1 });
     if (isSaved) {
-        cout << "Watermarked image saved as '" << output_image_path << "'." << endl;
+        //cout << "Watermarked image saved as '" << output_image_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save watermarked image." << endl;
@@ -987,7 +987,7 @@ int omp(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay,
     Mat ori = imread("resized_" + original_image_path, IMREAD_UNCHANGED);
     Mat wm = imread(output_image_path, IMREAD_UNCHANGED);
     *psnr = PSNR(ori, wm);
-    cout << "Sequential PSNR embedding : " << *psnr << endl;
+    cout << "Omp PSNR embedding : " << *psnr << endl;
 
     //Extraction
     if (!std::filesystem::exists(output_image_path)) {
@@ -1015,7 +1015,7 @@ int omp(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay,
     string extracted_watermark_path = "extracted_watermark.png";
     bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
     if (isWatermarkSaved) {
-        cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
+        //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
     }
     else {
         cerr << "Error: Could not save the extracted watermark." << endl;

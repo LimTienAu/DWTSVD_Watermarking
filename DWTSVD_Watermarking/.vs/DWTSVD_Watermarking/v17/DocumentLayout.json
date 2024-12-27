@@ -3,36 +3,36 @@
   "WorkspaceRootPath": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\sequential.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\sequential.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda_embed.cu||{8B382828-6202-11D1-8870-0000F87579D2}",
+      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Cuda_embed.cu||{8B382828-6202-11D1-8870-0000F87579D2}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Sequential.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Cuda.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Omp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Omp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Sequential.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Runner.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Runner.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda_embed.cu||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Cuda_embed.cu||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
       "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Cuda.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\ompwatermark.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\ompwatermark.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Omp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Omp.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
-      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\Sequential.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
+      "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\ompwatermark.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "RelativeMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|solutionrelative:DWTSVD_Watermarking\\ompwatermark.h||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{001A5FAC-4957-4B45-93E5-D5C19C600C01}|DWTSVD_Watermarking\\DWTSVD_Watermarking.vcxproj|C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda_embed.cuh||{8B382828-6202-11D1-8870-0000F87579D2}",
@@ -46,7 +46,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 8,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -58,40 +58,42 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
+              "DocumentIndex": 7,
               "Title": "ompwatermark.h",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\ompwatermark.h",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\ompwatermark.h",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\ompwatermark.h",
               "RelativeToolTip": "DWTSVD_Watermarking\\ompwatermark.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAMAAAA",
+              "ViewState": "AgIAADMAAAAAAAAAAAAAAA4AAAAbAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-12-25T14:05:34.192Z"
+              "WhenOpened": "2024-12-25T14:05:34.192Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 6,
               "Title": "Omp.cpp",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Omp.cpp",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Omp.cpp",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Omp.cpp",
               "RelativeToolTip": "DWTSVD_Watermarking\\Omp.cpp",
-              "ViewState": "AgIAAF4CAAAAAAAAAAASwIEDAAAHAAAAAAAAAA==",
+              "ViewState": "AgIAAJMDAAAAAAAAAIAwwN4DAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-12-25T14:05:11.967Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
+              "DocumentIndex": 0,
               "Title": "Cuda_embed.cu",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda_embed.cu",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Cuda_embed.cu",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda_embed.cu",
               "RelativeToolTip": "DWTSVD_Watermarking\\Cuda_embed.cu",
-              "ViewState": "AQIAAAQAAAAAAAAAAAAcwPEAAAASAAAA",
+              "ViewState": "AgIAACcAAAAAAAAAAAAAAEIAAAAmAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001001|",
-              "WhenOpened": "2024-12-24T11:43:29.011Z"
+              "WhenOpened": "2024-12-24T11:43:29.011Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
@@ -101,60 +103,62 @@
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Cuda.h",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda.h",
               "RelativeToolTip": "DWTSVD_Watermarking\\Cuda.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-12-24T10:16:36.572Z"
+              "WhenOpened": "2024-12-24T10:16:36.572Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
+              "DocumentIndex": 4,
               "Title": "Runner.cpp",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Runner.cpp",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Runner.cpp",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Runner.cpp",
               "RelativeToolTip": "DWTSVD_Watermarking\\Runner.cpp",
-              "ViewState": "AgIAAFUAAAAAAAAAAAAAAGAAAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADwAAAAnAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-12-19T02:20:00.138Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
+              "DocumentIndex": 2,
               "Title": "Cuda.cpp",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda.cpp",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Cuda.cpp",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Cuda.cpp",
               "RelativeToolTip": "DWTSVD_Watermarking\\Cuda.cpp",
-              "ViewState": "AgIAAFUBAAAAAAAAAAAAAF8BAAA7AAAAAAAAAA==",
+              "ViewState": "AgIAAK8BAAAAAAAAAAAAAF8BAAA7AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-12-24T16:24:26.1Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 0,
+              "DocumentIndex": 1,
               "Title": "Sequential.cpp",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.cpp",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Sequential.cpp",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.cpp",
               "RelativeToolTip": "DWTSVD_Watermarking\\Sequential.cpp",
-              "ViewState": "AgIAAAcCAAAAAAAAAAAAABgCAAA7AAAAAAAAAA==",
+              "ViewState": "AgIAABsAAAAAAAAAAAAAALwDAAALAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2024-12-16T05:08:15.391Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 7,
+              "DocumentIndex": 3,
               "Title": "Sequential.h",
               "DocumentMoniker": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.h",
               "RelativeDocumentMoniker": "DWTSVD_Watermarking\\Sequential.h",
               "ToolTip": "C:\\Users\\gogo2\\tarc\\DSPC\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\DWTSVD_Watermarking\\Sequential.h",
               "RelativeToolTip": "DWTSVD_Watermarking\\Sequential.h",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
+              "ViewState": "AgIAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000680|",
-              "WhenOpened": "2024-12-19T04:39:13.309Z"
+              "WhenOpened": "2024-12-19T04:39:13.309Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",

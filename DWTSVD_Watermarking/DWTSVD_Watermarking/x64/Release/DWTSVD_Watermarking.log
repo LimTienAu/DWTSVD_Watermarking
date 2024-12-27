@@ -848,7 +848,7 @@ C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermar
                                                   ^
   
   Cuda_embed.cu
-  tmpxft_00006a28_00000000-7_Cuda_embed.cudafe1.cpp
+  tmpxft_0000341c_00000000-7_Cuda_embed.cudafe1.cpp
 C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\packages\Eigen3.3.3.9\lib\native\include\Eigen\src/Core/util/DisableStupidWarnings.h(68): warning C4068: unknown pragma 'diag_suppress'
 C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\packages\Eigen3.3.3.9\lib\native\include\Eigen\src/Core/util/DisableStupidWarnings.h(70): warning C4068: unknown pragma 'diag_suppress'
 C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\packages\Eigen3.3.3.9\lib\native\include\Eigen\src/Core/util/DisableStupidWarnings.h(72): warning C4068: unknown pragma 'diag_suppress'
@@ -997,12 +997,16 @@ C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermar
 C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Cuda_embed.cu(332): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
   Cuda.cpp
 C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Cuda.cpp(189,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Omp.cpp
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Omp.cpp(457,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Omp.cpp(665,13): warning C4849: OpenMP 'collapse' clause ignored in 'for' directive
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Omp.cpp(702,13): warning C4849: OpenMP 'collapse' clause ignored in 'for' directive
   Sequential.cpp
-C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Sequential.cpp(344,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Sequential.cpp(461,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
   Runner.cpp
   Generating code
   Previous IPDB not found, fall back to full compilation.
-  All 7037 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 7249 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   DWTSVD_Watermarking.vcxproj -> C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\x64\Release\DWTSVD_Watermarking.exe
   C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\DWTSVD_Watermarking\Dependencies\opencv\build\x64\vc16\bin\opencv_world4100.dll
