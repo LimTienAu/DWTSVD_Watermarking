@@ -495,7 +495,7 @@ Mat cuda_embed_watermark(
 
         cuda_inverse_haar_wavelet_transform(modified_LL, LH, HL, HH, reconstructed_block);
 
-        //reconstructed_block.setTo(cv::Scalar(255));  //For displaying where the selected block are
+        //                  reconstructed_block.setTo(cv::Scalar(255));  //For displaying where the selected block are
         reconstructed_block.copyTo(watermarked_image(block_loc));
     }
 
@@ -555,11 +555,9 @@ Mat cuda_extract_watermark(const Mat& watermarked_int_image, const string& key_f
     return extracted_watermark;
 }
 
-int cuda_main(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay, string original_image_path, string watermark_image_path) {
+int cuda_main(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay, string original_image_path, string watermark_image_path, int watermark_width, int watermark_height) {
     int original_width = 512;
     int original_height = 512;
-    int watermark_width = 64;
-    int watermark_height = 64;
     int block_size = 4;
     int n_blocks_to_embed = 128;
     double spatial_weight = 0.33;
@@ -668,7 +666,7 @@ int cuda_main(std::chrono::milliseconds* execution_time, double* psnr, bool isDi
     }
 
     // Save the extracted watermark
-    string extracted_watermark_path = "extracted_watermark.png";
+    string extracted_watermark_path = "cuda_extracted_watermark.png";
     bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
     if (isWatermarkSaved) {
         //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;

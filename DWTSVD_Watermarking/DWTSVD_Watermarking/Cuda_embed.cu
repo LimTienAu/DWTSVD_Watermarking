@@ -105,7 +105,7 @@ __global__ void medianFilterKernel(const unsigned char* input, double* diff_accu
 
         unsigned char median_value = window[count / 2];
         double diff = fabs(static_cast<double>(input[row * cols + col]) - median_value);
-        atomicAddDouble(&diff_accum[row * cols + col], diff);
+        atomicAdd(&diff_accum[row * cols + col], diff);
     }
 }
 
@@ -121,7 +121,7 @@ __global__ void addNoiseKernel(unsigned char* input, double* diff_accum,
 
     if (stddev_idx < num_stddevs && row < rows && col < cols) {
         double stddev = stddev_values[stddev_idx];
-        double noise = stddev * curand_uniform_double(&state) * 2.0 - stddev; // Simplistic noise generator
+        double noise = curand_normal_double(&state) * stddev + 0; //opencv randn uses 0 as the mean by default
         double original_value = static_cast<double>(input[row * cols + col]);
         double noisy_value = max(0.0, min(255.0, original_value + noise));
 

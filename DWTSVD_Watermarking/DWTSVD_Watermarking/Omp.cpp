@@ -29,11 +29,6 @@ Mat omp_apply_blur(const Mat& img, double sigma) {
     // Ensure the input image is single-channel (grayscale)
     CV_Assert(img.channels() == 1);
 
-    const double MAX_SIGMA = 10.0;
-    if (sigma > MAX_SIGMA) {
-        sigma = MAX_SIGMA;
-    }
-
     // Determine the kernel size based on sigma (6*sigma + 1)
     int kernelSize = static_cast<int>(ceil(6 * sigma)) | 1; // Ensure kernel size is odd
     int halfSize = kernelSize / 2;
@@ -48,6 +43,7 @@ Mat omp_apply_blur(const Mat& img, double sigma) {
     int cols = img.cols;
 
     // Perform convolution
+    #pragma omp parallel for collapse(2) schedule(dynamic)
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             double sum = 0.0;
@@ -73,15 +69,6 @@ Mat omp_apply_blur(const Mat& img, double sigma) {
 
 // Function to add Additive White Gaussian Noise (AWGN)
 Mat omp_apply_awgn(const Mat& img, double stddev) {
-    /*Mat noise = Mat(img.size(), CV_64F);
-    randn(noise, 0, stddev);
-    Mat noisy_img;
-    img.convertTo(noisy_img, CV_64F);
-    noisy_img += noise;
-    noisy_img = max(noisy_img, 0.0);
-    noisy_img = min(noisy_img, 255.0);
-    noisy_img.convertTo(noisy_img, CV_8U);
-    return noisy_img;*/
 
     // Create a noise matrix of type double for precision
     Mat noise(img.size(), CV_64F);
@@ -97,6 +84,7 @@ Mat omp_apply_awgn(const Mat& img, double stddev) {
     int cols = noisy_img.cols;
 
     // addition of noise
+#pragma omp parallel for collapse(2) schedule(dynamic)
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             // Add noise to each pixel
@@ -115,9 +103,6 @@ Mat omp_apply_awgn(const Mat& img, double stddev) {
 
 // Function to apply median filtering
 Mat omp_apply_median_filter(const Mat& img, int kernel_size) {
-    /*Mat filtered;
-    medianBlur(img, filtered, kernel_size);
-    return filtered;*/
 
     // Calculate the border size based on the kernel size
     int border = kernel_size / 2;
@@ -133,6 +118,7 @@ Mat omp_apply_median_filter(const Mat& img, int kernel_size) {
     int cols = img.cols;
 
     // Iterate over each pixel in the image
+#pragma omp parallel for collapse(2) schedule(dynamic)
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             // Vector to store the neighborhood pixel values
@@ -162,13 +148,6 @@ Mat omp_apply_median_filter(const Mat& img, int kernel_size) {
 
 // Function to apply sharpening
 Mat omp_apply_sharpen(const Mat& img, double sigma, double alpha) {
-    /*Mat blurred, sharpened;
-    GaussianBlur(img, blurred, Size(0, 0), sigma);
-    sharpened = img + alpha * (img - blurred);
-    sharpened = max(sharpened, 0.0);
-    sharpened = min(sharpened, 255.0);
-    sharpened.convertTo(sharpened, CV_8U);
-    return sharpened;*/
 
 
     // Determine the kernel size based on sigma (common choice: 6*sigma +1)
@@ -189,6 +168,7 @@ Mat omp_apply_sharpen(const Mat& img, double sigma, double alpha) {
     int cols = img.cols;
 
     // Gaussian blur process 
+#pragma omp parallel for collapse(2) schedule(dynamic)
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             double accum = 0.0;
@@ -210,6 +190,7 @@ Mat omp_apply_sharpen(const Mat& img, double sigma, double alpha) {
     Mat sharpened = img_double + alpha * (img_double - blurred);
 
     // Clamp the pixel values to the range [0, 255] and convert back to 8-bit
+#pragma omp parallel for collapse(2) schedule(dynamic)
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < cols; ++j) {
             sharpened.at<double>(i, j) = std::min(std::max(sharpened.at<double>(i, j), 0.0), 255.0);
@@ -243,7 +224,7 @@ Mat omp_resizeImage(const Mat& img, int newRows, int newCols) {
     Mat resized(newRows, newCols, img.type());
     double rowScale = static_cast<double>(img.rows) / newRows;
     double colScale = static_cast<double>(img.cols) / newCols;
-
+#pragma omp parallel for collapse(2) schedule(dynamic)
     for (int r = 0; r < newRows; ++r) {
         for (int c = 0; c < newCols; ++c) {
             double origY = r * rowScale;
@@ -623,71 +604,54 @@ Mat omp_embed_watermark(
     vector<double> sharpen_alpha_values = { 0.1, 0.5, 1, 2 };
     vector<double> resize_scale_values = { 0.5, 0.75, 0.9, 1.1, 1.5 };
     int num_threads = omp_get_max_threads();
-    vector<Mat> local_diffs(num_threads, Mat::zeros(original.size(), CV_64F));
-
     auto embed_begin = std::chrono::high_resolution_clock::now();
-#pragma omp parallel
-    {
-        int thread_id = omp_get_thread_num();
-        Mat& local_diff = local_diffs[thread_id];
 
-        // 1. Gaussian Blur
-#pragma omp for schedule(static)
+        // 1. Gaussian blur
         for (int i = 0; i < blur_sigma_values.size(); i++) {
             Mat attacked = omp_apply_blur(original, blur_sigma_values[i]);
             Mat diff;
             absdiff(attacked, original, diff);
             diff.convertTo(diff, CV_64F);
-            local_diff += diff;
+            blank_image += diff;
         }
 
         // 2. Median Filtering
-#pragma omp for schedule(static)
         for (int i = 0; i < median_kernel_sizes.size(); i++) {
             Mat attacked = omp_apply_median_filter(original, median_kernel_sizes[i]);
             Mat diff;
             absdiff(attacked, original, diff);
             diff.convertTo(diff, CV_64F);
-            local_diff += diff;
+            blank_image += diff;
         }
 
         // 3. Additive White Gaussian Noise
-#pragma omp for schedule(static)
         for (int i = 0; i < awgn_std_values.size(); i++) {
             Mat attacked = omp_apply_awgn(original, awgn_std_values[i]);
             Mat diff;
             absdiff(attacked, original, diff);
             diff.convertTo(diff, CV_64F);
-            local_diff += diff;
+            blank_image += diff;
         }
 
         // 4. Sharpening
-#pragma omp for collapse(2) schedule(static)
         for (int i = 0; i < sharpen_sigma_values.size(); i++) {
             for (int j = 0; j < sharpen_alpha_values.size(); j++) {
                 Mat attacked = omp_apply_sharpen(original, sharpen_sigma_values[i], sharpen_alpha_values[j]);
                 Mat diff;
                 absdiff(attacked, original, diff);
                 diff.convertTo(diff, CV_64F);
-                local_diff += diff;
+                blank_image += diff;
             }
         }
 
         // 5. Resizing
-#pragma omp for schedule(static)
         for (int i = 0; i < resize_scale_values.size(); i++) {
             Mat attacked = omp_apply_resize(original, resize_scale_values[i]);
             Mat diff;
             absdiff(attacked, original, diff);
             diff.convertTo(diff, CV_64F);
-            local_diff += diff;
+            blank_image += diff;
         }
-        local_diffs[thread_id] = local_diff;
-    }
-
-    for (const auto& diff : local_diffs) {
-        blank_image += diff;
-    }
 
     // Block selection based on spatial and attack values
     vector<Block> blocks_to_watermark;
@@ -834,6 +798,7 @@ Mat omp_embed_watermark(
         omp_reconstruct_matrix(Uc, Sc, Vtc, modified_LL);
         omp_inverse_haar_wavelet_transform(modified_LL, LH, HL, HH, reconstructed_block);
 
+        //reconstructed_block.setTo(cv::Scalar(255));  //For displaying where the selected block are
         // Replace the block in the watermarked image
         reconstructed_block.copyTo(watermarked_image(block_loc));
     }
@@ -1012,7 +977,7 @@ int omp(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay,
     }
 
     // Save the extracted watermark
-    string extracted_watermark_path = "extracted_watermark.png";
+    string extracted_watermark_path = "omp_extracted_watermark.png";
     bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
     if (isWatermarkSaved) {
         //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;

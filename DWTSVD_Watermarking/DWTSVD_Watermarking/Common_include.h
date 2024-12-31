@@ -21,3 +21,9 @@ struct Block {
     double attack_value;
     double merit;
 };
+
+enum Attack {
+    gaussian,
+    median,
+    compression
+};

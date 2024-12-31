@@ -67,5 +67,7 @@ Mat embed_watermark(
 );
 
 Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filename, int n_blocks_to_extract = 32, int block_size = 4, double alpha = 5.11);
+void sequential_validation(bool isDisplay, string original_image_path, string watermark_image_path, int watermark_width, int watermark_height, string type_name = "serial");
+void sequential_attack(Attack attack_type, string output_filename, boolean is_display, Mat original_watermark, string type_name);
 
-int sequential(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png");
+int sequential(std::chrono::milliseconds* execution_time, double* psnr, bool isDisplay = false, string original_image_path = "home.jpg", string watermark_image_path = "mono.png", int watermark_width=64, int watermark_height=64);

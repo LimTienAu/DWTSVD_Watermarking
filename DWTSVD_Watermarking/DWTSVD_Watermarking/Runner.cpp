@@ -44,19 +44,48 @@ void append_to_json(const string& file_path, const json& new_data) {
 int main(int argc, char* argv[]) {
 
     std::chrono::milliseconds execution_time;
-    string original_image_path = "apollo-medium.jpg"; //"apollo-medium.jpg"
+    string original_image_path = "aldrin.jpg"; //"apollo-medium.jpg" home.jpg aldrin.jpg
     string watermark_image_path = "mono.png";
     double ave_execution_time, ave_psnr, psnr=0;
     int watermark_width = 64;
     int watermark_height = 64;
     int type = 0, loop = 3;
-
-    if (argc > 1 && argc != 7) {
-        cerr << "Usage: " << argv[0] << " <original_image_path> <watermark_image_path> <watermark_width> <watermark_height> <type> <loop_number>" << endl;
+    boolean is_display = false, is_attack = false;
+    
+    if (argc > 1 && argc != 8) {
+        cerr << "Usage: " << argv[0] << " <original_image_path> <watermark_image_path> <watermark_width> <watermark_height> <type> <loop_number> <is_show_int>" << endl;
+        cerr << "Attack Usage: " << argv[0] << " attack <original_image_path> <watermark_image_path> <watermark_width> <watermark_height> <type> <is_show_int>" << endl;
         cerr << "* For type: 0 = Serial, 1 = OMP, 2 = CUDA, 3 = MPI" << endl;
         return 1; // Exit with error code
     }
-    else if (argc == 7)
+    else if (std::string(argv[1]) == "attack") {
+        //Perform attack and validation
+        is_attack = true;
+        original_image_path = argv[2];
+        watermark_image_path = argv[3];
+        watermark_width = atoi(argv[4]);
+        watermark_height = atoi(argv[5]);
+        type = atoi(argv[6]);
+        if (atoi(argv[7]) == 1)
+            is_display = true;
+
+        switch (type) {
+        case 1:
+            //OMP
+            sequential_validation(is_display, original_image_path, watermark_image_path, watermark_width, watermark_height, "omp");
+            break;
+        case 2:
+            //CUDA
+            sequential_validation(is_display, original_image_path, watermark_image_path, watermark_width, watermark_height, "cuda");
+            break;
+        case 0:
+        default:
+            //Serial
+            sequential_validation(is_display, original_image_path, watermark_image_path, watermark_width, watermark_height, "serial");
+        }
+        return 0;
+    }
+    else if (argc == 8)
     {
         // Parse command-line arguments
         original_image_path = argv[1];
@@ -67,6 +96,8 @@ int main(int argc, char* argv[]) {
         watermark_height = atoi(argv[4]);
         type = atoi(argv[5]);
         loop = atoi(argv[6]);
+        if(atoi(argv[7]) == 1)
+            is_display = true;
     }
 
     if (watermark_width <= 0 || watermark_height <= 0) {
@@ -94,17 +125,17 @@ int main(int argc, char* argv[]) {
     for (int i = 0; i < loop; i++) {
         switch (type) {
         case 1:
-            omp(&execution_time,&psnr, false, original_image_path, watermark_image_path, watermark_width, watermark_height);
+            omp(&execution_time,&psnr, is_display, original_image_path, watermark_image_path, watermark_width, watermark_height);
             break;
         case 2:
-            cuda_main(&execution_time, &psnr, false, original_image_path, watermark_image_path);
+            cuda_main(&execution_time, &psnr, is_display, original_image_path, watermark_image_path, watermark_width, watermark_height);
             break;
         case 3:
             //mpi(&execution_time, false, original_image_path, watermark_image_path);
             break;
         case 0:
         default:
-            sequential(&execution_time, &psnr, false, original_image_path, watermark_image_path);
+            sequential(&execution_time, &psnr, is_display, original_image_path, watermark_image_path, watermark_width, watermark_height);
         }
         
         store_execution_time.push_back(execution_time.count());

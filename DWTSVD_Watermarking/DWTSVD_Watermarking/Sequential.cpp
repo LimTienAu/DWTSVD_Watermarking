@@ -857,11 +857,9 @@ Mat extract_watermark(const Mat& watermarked_int_image, const string& key_filena
     return extracted_watermark;
 }
 
-int sequential(std::chrono::milliseconds * execution_time, double* psnr, bool isDisplay, string original_image_path, string watermark_image_path) {
+int sequential(std::chrono::milliseconds * execution_time, double* psnr, bool isDisplay, string original_image_path, string watermark_image_path, int watermark_width, int watermark_height) {
     int original_width = 512;
     int original_height = 512;
-    int watermark_width = 64;
-    int watermark_height = 64;
     int block_size = 4;
     int n_blocks_to_embed = 128;
     double spatial_weight = 0.33;
@@ -970,7 +968,7 @@ int sequential(std::chrono::milliseconds * execution_time, double* psnr, bool is
     }
 
     // Save the extracted watermark
-    string extracted_watermark_path = "extracted_watermark.png";
+    string extracted_watermark_path = "serial_extracted_watermark.png";
     bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
     if (isWatermarkSaved) {
         //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
@@ -979,4 +977,135 @@ int sequential(std::chrono::milliseconds * execution_time, double* psnr, bool is
         cerr << "Error: Could not save the extracted watermark." << endl;
     }
     return 0;
+}
+
+void sequential_attack(Attack attack_type, string output_filename, boolean is_display, Mat original_watermark, string type_name) {
+    int original_width = 512;
+    int original_height = 512;
+    int block_size = 4;
+    int n_blocks_to_embed = 128;
+    double spatial_weight = 0.33;
+    const double alpha = 5.11;
+    string output_image_path = output_filename + ".tiff";
+    string attack_type_name;
+
+    //Extraction
+    if (!std::filesystem::exists(output_image_path)) {
+        std::cerr << "File does not exist: " << output_image_path << std::endl;
+        return;
+    }
+
+    Mat ext_watermarked_image = imread(output_image_path, IMREAD_UNCHANGED);
+    if (ext_watermarked_image.empty()) {
+        cerr << "Error: Could not load original image from path: " << output_image_path << endl;
+        return;
+    }
+
+    //Perform attack
+    switch (attack_type) {
+    case Attack::gaussian:
+        attack_type_name = "Gaussian Blur";
+        GaussianBlur(ext_watermarked_image, ext_watermarked_image, Size(3, 3), 1.5);
+        break;    
+    case Attack::median:
+        attack_type_name = "Median Blur";
+        medianBlur(ext_watermarked_image, ext_watermarked_image, 3);
+        break;
+    case Attack::compression:
+    default:
+        attack_type_name = "JPEG Compression";
+        std::vector<uchar> compressed_data;
+        imencode(".jpg", ext_watermarked_image, compressed_data, { cv::IMWRITE_JPEG_QUALITY, 50 }); // Quality: 50 (adjust as needed)
+        // Decode the compressed data
+        ext_watermarked_image = imdecode(compressed_data, IMREAD_GRAYSCALE); 
+    }
+    
+
+    if (is_display) {
+        namedWindow("Attacked Image - "+ attack_type_name, WINDOW_NORMAL);
+        imshow("Attacked Image - "+ attack_type_name, ext_watermarked_image);
+        waitKey(0);
+    }
+
+    Mat extracted_watermark = extract_watermark(ext_watermarked_image, output_filename, n_blocks_to_embed, block_size, alpha);
+
+    if (is_display) {
+        // Display the extracted watermark
+        namedWindow("Extracted Watermark - "+ attack_type_name, WINDOW_NORMAL);
+        imshow("Extracted Watermark - "+ attack_type_name, extracted_watermark);
+        waitKey(0);
+    }
+
+    string extracted_watermark_path = type_name + "_extracted_watermark_"+ attack_type_name +".png";
+    bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
+    if (isWatermarkSaved) {
+        //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
+    }
+    else {
+        cerr << "Error: Could not save the extracted watermark." << endl;
+    }
+
+}
+
+void sequential_validation(bool isDisplay, string original_image_path, string watermark_image_path, int watermark_width, int watermark_height, string type_name) {
+    int original_width = 512;
+    int original_height = 512;
+    int block_size = 4;
+    int n_blocks_to_embed = 128;
+    double spatial_weight = 0.33;
+    const double alpha = 5.11;
+
+    string output_filename = type_name + "_watermarked_image";
+    string output_image_path = output_filename + ".tiff";
+
+    Mat watermark_image = imread(watermark_image_path, IMREAD_GRAYSCALE);
+    if (watermark_image.empty()) {
+        cerr << "Error: Could not load watermark image from path: " << watermark_image_path << endl;
+        return;
+    }
+    resize(watermark_image, watermark_image, Size(watermark_width, watermark_height), 0, 0, INTER_LINEAR);
+
+    sequential_attack(Attack::gaussian, output_filename, isDisplay, watermark_image, type_name);
+    sequential_attack(Attack::median, output_filename, isDisplay, watermark_image, type_name);
+    sequential_attack(Attack::compression, output_filename, isDisplay, watermark_image, type_name);
+
+    //show what happen if extract image without watermark
+    Mat ext_watermarked_image = imread(original_image_path, IMREAD_GRAYSCALE);
+    if (ext_watermarked_image.empty()) {
+        cerr << "Error: Could not load original image from path: " << output_image_path << endl;
+        return;
+    }
+
+    if (isDisplay) {
+        namedWindow("Image without watermark", WINDOW_NORMAL);
+        imshow("Image without watermark", ext_watermarked_image);
+        waitKey(0);
+    }
+    Mat extracted_watermark = extract_watermark(ext_watermarked_image, output_filename, n_blocks_to_embed, block_size, alpha);
+
+    if (isDisplay) {
+        // Display the extracted watermark
+        namedWindow("Extracted Watermark - No WM", WINDOW_NORMAL);
+        imshow("Extracted Watermark - No WM", extracted_watermark);
+        waitKey(0);
+    }
+
+    if (isDisplay) {
+        // Display the extracted watermark
+        namedWindow("Original Watermark", WINDOW_NORMAL);
+        imshow("Original Watermark", watermark_image);
+        waitKey(0);
+    }
+
+    string extracted_watermark_path = type_name+"_no_watermark_extract.png";
+    bool isWatermarkSaved = imwrite(extracted_watermark_path, extracted_watermark);
+    if (isWatermarkSaved) {
+        //cout << "Extracted watermark saved as '" << extracted_watermark_path << "'." << endl;
+    }
+    else {
+        cerr << "Error: Could not save the extracted watermark." << endl;
+    }
+
+    return;
+    
 }
