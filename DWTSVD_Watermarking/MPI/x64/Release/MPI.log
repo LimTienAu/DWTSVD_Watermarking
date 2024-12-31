@@ -1,0 +1,13 @@
+﻿  MPI.cpp
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\MPI\MPI.cpp(12,20): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\MPI\MPI.cpp(515,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\MPI\MPI.cpp(814,24): warning C4267: 'initializing': conversion from 'size_t' to 'int', possible loss of data
+  Runner.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\MPI\MPI.cpp(993): warning C4715: 'mpi_embed_watermark': not all control paths return a value
+  All 6973 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  MPI.vcxproj -> C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\x64\Release\MPI.exe
+  C:\Users\gogo2\tarc\DSPC\DWTSVD_Watermarking\DWTSVD_Watermarking\Dependencies\opencv\build\x64\vc16\bin\opencv_world4100.dll
+  1 File(s) copied

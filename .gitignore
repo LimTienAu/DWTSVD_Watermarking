@@ -1,4 +1,5 @@
 DWTSVD_Watermarking/opencv
-DWTSVD_Watermarking/DWTSVD_Watermarking/Dependencies
+DWTSVD_Watermarking/Dependencies
 DWTSVD_Watermarking/.vs/DWTSVD_Watermarking
-DWTSVD_Watermarking/x64/Debug/*.dll
+DWTSVD_Watermarking/x64/Release/*.dll
+DWTSVD_Watermarking/x64/
